@@ -1,0 +1,60 @@
+from sanic import Blueprint
+
+from common.exception import MyException
+from common.res_decorator import async_json_resp
+from common.token_decorator import check_token
+from constants.code_enum import SysCodeEnum
+from services.user_service import authenticate_user, generate_jwt_token, query_user_record, get_user_info, delete_user_record
+
+bp = Blueprint("userService", url_prefix="/user"***REMOVED***
+
+
+@bp.post("/login"***REMOVED***
+@async_json_resp
+async def login(request***REMOVED***:
+    """
+    用户登录
+    :param request:
+    :return:
+    """
+    username = request.json.get("username"***REMOVED***
+    password = request.json.get("password"***REMOVED***
+
+    # 调用用户服务进行验证
+    user = await authenticate_user(username, password***REMOVED***
+    if user:
+        # 如果验证通过，生成 JWT token
+        token = await generate_jwt_token(user["id"], user["userName"]***REMOVED***
+    ***REMOVED***"token": token***REMOVED***
+    else:
+        # 如果验证失败，返回错误信息
+        raise MyException(SysCodeEnum.c_401***REMOVED***
+
+
+@bp.post("/query_user_record", name="query_user_record"***REMOVED***
+@check_token
+@async_json_resp
+async def query_user_qa_record(request***REMOVED***:
+    """
+    查询用户聊天记录
+    :param request:
+    :return:
+    """
+    page = int(request.json.get("page", 1***REMOVED******REMOVED***
+    limit = int(request.json.get("limit", 10***REMOVED******REMOVED***
+    user_info = await get_user_info(request***REMOVED***
+    return await query_user_record(user_info["id"], page, limit***REMOVED***
+
+
+@bp.post("/delete_user_record"***REMOVED***
+@check_token
+@async_json_resp
+async def delete_user_qa_record(request***REMOVED***:
+    """
+    删除用户聊天记录
+    :param request:
+    :return:
+    """
+    record_ids = request.json.get("record_ids"***REMOVED***
+    user_info = await get_user_info(request***REMOVED***
+    return await delete_user_record(user_info["id"], record_ids***REMOVED***

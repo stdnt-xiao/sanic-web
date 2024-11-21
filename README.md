@@ -25,6 +25,7 @@
 
 ## 运行效果
 ![image](./images/chat-04.gif***REMOVED***
+![image](./images/chat-05.jpg***REMOVED***
 ![image](./images/chat-01.png***REMOVED***
 ![image](./images/chat-03.png***REMOVED***
 

@@ -151,7 +151,7 @@ async def query_user_record(user_id, page, limit***REMOVED***:
 
     # 计算偏移量
     offset = (page - 1***REMOVED*** * limit
-    sql = f"""select * from t_user_qa_record where user_id={user_id***REMOVED*** order by id LIMIT {limit***REMOVED*** OFFSET {offset***REMOVED***"""
+    sql = f"""select * from t_user_qa_record where user_id={user_id***REMOVED*** order by id desc LIMIT {limit***REMOVED*** OFFSET {offset***REMOVED***"""
     records = mysql_client.query_mysql_dict(sql***REMOVED***
 
 ***REMOVED***"records": records, "current_page": page, "total_pages": total_pages, "total_count": total_count***REMOVED***

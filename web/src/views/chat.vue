@@ -172,10 +172,12 @@ const handleCreateStylized = async (send_text = ''***REMOVED*** => {
     ***REMOVED***
 
     //加入对话历史用于左边表格渲染
-    tableData.value.push({
-        index: tableData.value.length,
+    const newItem = {
+        index: tableData.value.length, // 或者根据你的需求计算新的索引
         key: inputTextString.value ? inputTextString.value : send_text
-    ***REMOVED******REMOVED***
+    ***REMOVED***
+    // 使用 unshift 方法将新元素添加到数组的最前面
+    tableData.value.unshift(newItem***REMOVED***
 
     //调用大模型后台服务接口
     stylizingLoading.value = true
@@ -286,26 +288,26 @@ watch(
     ***REMOVED***
 ***REMOVED***
 
-// 监听对话历史表格数据变化滚动条到底部
-watch(
-    tableData,
-    (newData***REMOVED*** => {
-        nextTick((***REMOVED*** => {
-            scrollToBottomChatTable(***REMOVED***
-        ***REMOVED******REMOVED***
-    ***REMOVED***,
-  ***REMOVED*** deep: true ***REMOVED***
-***REMOVED***
+// // 监听对话历史表格数据变化滚动条到底部
+// watch(
+//     tableData,
+//     (newData***REMOVED*** => {
+//         nextTick((***REMOVED*** => {
+//             scrollToBottomChatTable(***REMOVED***
+//         ***REMOVED******REMOVED***
+//     ***REMOVED***,
+//   ***REMOVED*** deep: true ***REMOVED***
+// ***REMOVED***
 
-const scrollToBottomChatTable = (***REMOVED*** => {
-    if (tableRef.value***REMOVED*** {
-        //这里获取到的是sidebar div 的dom
-        const bodyWrapper = document.querySelector('.scrollable-sidebar'***REMOVED***
-        if (bodyWrapper***REMOVED*** {
-            bodyWrapper.scrollTop = bodyWrapper.scrollHeight
-        ***REMOVED***
-    ***REMOVED***
-***REMOVED***
+// const scrollToBottomChatTable = (***REMOVED*** => {
+//     if (tableRef.value***REMOVED*** {
+//         //这里获取到的是sidebar div 的dom
+//         const bodyWrapper = document.querySelector('.scrollable-sidebar'***REMOVED***
+//         if (bodyWrapper***REMOVED*** {
+//             bodyWrapper.scrollTop = bodyWrapper.scrollHeight
+//         ***REMOVED***
+//     ***REMOVED***
+// ***REMOVED***
 
 const handleResetState = (***REMOVED*** => {
     if (isMockDevelopment***REMOVED*** {

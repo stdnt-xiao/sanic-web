@@ -25,9 +25,9 @@ async def read_file(req: Request***REMOVED***:
     :return:
     """
 
-    file_key = req.args.get("file_key"***REMOVED***
+    file_key = req.args.get("file_qa_str"***REMOVED***
     if not file_key:
-        file_key = req.json.get("file_key"***REMOVED***
+        file_key = req.json.get("file_qa_str"***REMOVED***
 
     file_key = file_key.split("|"***REMOVED***[0]  # 取文档地址
 

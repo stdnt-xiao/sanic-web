@@ -79,6 +79,8 @@ export const fetchConversationHistory = async function fetchConversationHistory(
     isInit: Ref<boolean>,
     conversationItems: Ref<
         Array<{
+            qa_type: string
+            question: string
             role: 'user' | 'assistant'
             reader: ReadableStreamDefaultReader | null
         ***REMOVED***>
@@ -112,47 +114,57 @@ export const fetchConversationHistory = async function fetchConversationHistory(
 
                 const itemsToAdd: any[] = []
                 for (const record of records***REMOVED*** {
+                    //用户问题
+                    let question_str = ''
+                    //问答类型
+                    let qa_type_str = ''
                     const streamDataArray: StreamData[] = []
 
-                    ;['question', 'to2_answer', 'to4_answer'].forEach(
-                        (key: string***REMOVED*** => {
-                            if (record.hasOwnProperty(key***REMOVED******REMOVED*** {
-                                switch (key***REMOVED*** {
-                                    case 'question':
+                    ;[
+                        'question',
+                        'to2_answer',
+                        'to4_answer',
+                        'qa_type'
+                ***REMOVED***.forEach((key: string***REMOVED*** => {
+                        if (record.hasOwnProperty(key***REMOVED******REMOVED*** {
+                            switch (key***REMOVED*** {
+                                case 'qa_type':
+                                    qa_type_str = record[key]
+                                    break
+                                case 'question':
+                                    question_str = record[key]
+                                    streamDataArray.push({
+                                        dataType: 't11',
+                                  ***REMOVED***问题:${record[key]***REMOVED***`
+                                    ***REMOVED******REMOVED***
+                                    break
+                                case 'to2_answer':
+                                  ***REMOVED***
                                         streamDataArray.push({
-                                            dataType: 't11',
-                                      ***REMOVED***问题:${record[key]***REMOVED***`
+                                            dataType: 't02',
+                                            data: {
+                                                content: JSON.parse(record[key]***REMOVED***
+                                                    .data.content
+                                            ***REMOVED***
                                         ***REMOVED******REMOVED***
-                                        break
-                                    case 'to2_answer':
-                                      ***REMOVED***
-                                            streamDataArray.push({
-                                                dataType: 't02',
-                                                data: {
-                                                    content: JSON.parse(
-                                                        record[key]
-                                                    ***REMOVED***.data.content
-                                                ***REMOVED***
-                                            ***REMOVED******REMOVED***
-                                        ***REMOVED*** catch (e***REMOVED*** {
-                                            console.log(e***REMOVED***
-                                        ***REMOVED***
-                                        break
-                                    case 'to4_answer':
-                                        if (
-                                            record[key] !== null &&
-                                            record[key] !== undefined
-                                        ***REMOVED*** {
-                                            streamDataArray.push({
-                                                dataType: 't04',
-                                                data: record[key]
-                                            ***REMOVED******REMOVED***
-                                        ***REMOVED***
-                                        break
-                                ***REMOVED***
+                                    ***REMOVED*** catch (e***REMOVED*** {
+                                        console.log(e***REMOVED***
+                                    ***REMOVED***
+                                    break
+                                case 'to4_answer':
+                                    if (
+                                        record[key] !== null &&
+                                        record[key] !== undefined
+                                    ***REMOVED*** {
+                                        streamDataArray.push({
+                                            dataType: 't04',
+                                            data: record[key]
+                                        ***REMOVED******REMOVED***
+                                    ***REMOVED***
+                                    break
                             ***REMOVED***
                         ***REMOVED***
-                    ***REMOVED***
+                    ***REMOVED******REMOVED***
 
                     if (streamDataArray.length > 0***REMOVED*** {
                         const stream = createStreamFromValue(streamDataArray***REMOVED*** // 创建新的流
@@ -163,6 +175,8 @@ export const fetchConversationHistory = async function fetchConversationHistory(
 
                         if (error === 0 && reader***REMOVED*** {
                             itemsToAdd.push({
+                                qa_type: qa_type_str,
+                                question: question_str,
                           ***REMOVED*** // 根据实际情况设置role
                                 reader
                             ***REMOVED******REMOVED***

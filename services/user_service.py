@@ -84,7 +84,7 @@ async def get_user_info(request***REMOVED*** -> dict:
     return user_info
 
 
-async def add_question_record(user_token, chat_id, question, t02_answer, t04_answer***REMOVED***:
+async def add_question_record(user_token, chat_id, question, t02_answer, t04_answer, qa_type***REMOVED***:
     """
     记录用户问答记录，如果记录已存在，则更新之；否则，创建新记录。
     """
@@ -103,8 +103,8 @@ async def add_question_record(user_token, chat_id, question, t02_answer, t04_ans
                     where user_id={user_id***REMOVED*** and chat_id='{chat_id***REMOVED***'"""
             mysql_client.update(sql***REMOVED***
         else:
-            insert_params = [user_id, chat_id, question, json.dumps(t02_answer, ensure_ascii=False***REMOVED***]
-            sql = f" insert into t_user_qa_record(user_id,chat_id,question,to2_answer***REMOVED*** values (%s,%s,%s,%s***REMOVED***"
+            insert_params = [user_id, chat_id, question, json.dumps(t02_answer, ensure_ascii=False***REMOVED***, qa_type]
+            sql = f" insert into t_user_qa_record(user_id,chat_id,question,to2_answer,qa_type***REMOVED*** values (%s,%s,%s,%s,%s***REMOVED***"
             mysql_client.insert(sql=sql, params=insert_params***REMOVED***
 
     except Exception as e:

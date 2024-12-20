@@ -126,6 +126,14 @@ const onChartReady = (index***REMOVED*** => {
     ***REMOVED***
 ***REMOVED***
 
+const onRecycleQa = async (index: number***REMOVED*** => {
+    const item = conversationItems.value[index]
+    // console.log(item.question, item.qa_type***REMOVED***
+    //设置当前选中的问答类型
+    onAqtiveChange(item.qa_type***REMOVED***
+    //发送问题重新生成
+    handleCreateStylized(item.question***REMOVED***
+***REMOVED***
 // 侧边栏对话历史
 interface TableItem {
     index: number
@@ -137,6 +145,8 @@ const tableRef = ref(null***REMOVED***
 //保存对话历史记录
 const conversationItems = ref<
     Array<{
+        qa_type: string
+        question: string
         role: 'user' | 'assistant'
         reader: ReadableStreamDefaultReader | null
     ***REMOVED***>
@@ -220,6 +230,8 @@ const handleCreateStylized = async (send_text = ''***REMOVED*** => {
         outputTextReader.value = reader
         // 添加助手的回答
         conversationItems.value.push({
+            qa_type: qa_type.value,
+            question: textContent,
       ***REMOVED***
             reader: reader
         ***REMOVED******REMOVED***
@@ -537,6 +549,7 @@ const onAqtiveChange = (val***REMOVED*** => {
                         @failed="(***REMOVED*** => onFailedReader(index***REMOVED***"
                         @completed="(***REMOVED*** => onCompletedReader(index***REMOVED***"
                         @chartready="(***REMOVED*** => onChartReady(index + 1***REMOVED***"
+                        @recycleQa="(***REMOVED*** => onRecycleQa(index***REMOVED***"
           ***REMOVED***
     ***REMOVED***
 ***REMOVED***

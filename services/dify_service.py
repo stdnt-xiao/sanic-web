@@ -55,11 +55,7 @@ class DiFyRequest:
             qa_type = req_obj.get("qa_type"***REMOVED***
             #  使用正则表达式移除所有空白字符（包括空格、制表符、换行符等）
             cleaned_query = re.sub(r"\s+", "", query***REMOVED***
-            source_chat = {
-                "chat_id": uuid_str,
-                "query": cleaned_query,
-                "inputs": {"qa_type": qa_type***REMOVED***,
-            ***REMOVED***
+            # source_chat = {"chat_id": uuid_str, "query": cleaned_query, "qa_type": qa_type***REMOVED***
 
             # 获取登录用户信息
             token = res.request.headers.get("Authorization"***REMOVED***
@@ -72,10 +68,10 @@ class DiFyRequest:
             qa_context = QaContext(token, query, uuid_str***REMOVED***
 
             # 判断请求类别
-            app_key = self._get_authorization_token(source_chat***REMOVED***
+            app_key = self._get_authorization_token(qa_type***REMOVED***
 
             # 构建请求参数
-            dify_service_url, body_params, headers = self._build_request(source_chat["query"], app_key***REMOVED***
+            dify_service_url, body_params, headers = self._build_request(cleaned_query, app_key, qa_type***REMOVED***
 
             async with aiohttp.ClientSession(read_bufsize=1024 * 16***REMOVED*** as session:
                 async with session.post(
@@ -202,22 +198,23 @@ class DiFyRequest:
         ***REMOVED***
 
     @staticmethod
-    def _build_request(query, app_key***REMOVED***:
+    def _build_request(query, app_key, qa_type***REMOVED***:
         """
         构建请求参数
         :param app_key:
-        :param query:
+        :param query: 用户问题
+        :param qa_type: 问答类型
         :return:
         """
         body_params = {
-            "inputs": {***REMOVED***,
             "query": query,
+            "inputs": {"qa_type": qa_type***REMOVED***,
             "response_mode": "streaming",
             "user": "abc-123",
         ***REMOVED***
         headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {app_key.value[1]***REMOVED***",
+            "Authorization": f"Bearer {app_key***REMOVED***",
         ***REMOVED***
 
         if os.getenv("ENV"***REMOVED*** == "test":
@@ -228,18 +225,17 @@ class DiFyRequest:
         return dify_service_url, body_params, headers
 
     @staticmethod
-    def _get_authorization_token(source_chat: Dict***REMOVED***:
+    def _get_authorization_token(qa_type: str***REMOVED***:
         """
             根据请求类别获取api/token
             固定走一个dify流
-            :param source_chat
+             app-IzudxfuN8uO2bvuCpUHpWhvH master分支默认的数据问答key
+            :param qa_type
         :return:
         """
-        # qa_type = source_chat["qa_type"]
-        # if qa_type == DiFyAppEnum.DATABASE_QA.value[0]:
-        #     return DiFyAppEnum.DATABASE_QA
-        # if qa_type == DiFyAppEnum.FILEDATA_QA.value[0]:
-        #     return DiFyAppEnum.FILEDATA_QA
-        # else:
-        #     raise ValueError("问答类型不支持"***REMOVED***
-        return DiFyAppEnum.DATABASE_QA
+        # 遍历枚举成员并检查第一个元素是否与测试字符串匹配
+        for member in DiFyAppEnum:
+            if member.value[0] == qa_type:
+                return os.getenv("DIFY_DATABASE_QA_API_KEY"***REMOVED***
+        else:
+            raise ValueError(f"问答类型 '{qa_type***REMOVED***' 不支持"***REMOVED***

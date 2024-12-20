@@ -9,12 +9,6 @@ bp = Blueprint("fileChatApi", url_prefix="/file"***REMOVED***
 
 minio_utils = MinioUtils(***REMOVED***
 
-"""
-文件问答存在的问题:
-1、生成的python脚本生成文本或图片无法确定
-2、本地7b模型生成的稳定性差
-"""
-
 
 @bp.post("/read_file"***REMOVED***
 @async_json_resp
@@ -40,7 +34,7 @@ async def read_file(req: Request***REMOVED***:
 @async_json_resp
 async def process_query(req: Request***REMOVED***:
     """
-
+     通过object_key获取文件url
     :param req:
     :return:
     """

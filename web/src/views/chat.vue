@@ -458,10 +458,18 @@ const rowProps = (row: any***REMOVED*** => {
 ***REMOVED***
         onClick: (***REMOVED*** => {
             suggested_array.value = []
-            console.log('rowProps', row.index***REMOVED***
+            // 这里*2 是因为对话渲染成两个
+            if (tableData.value.length * 2 != conversationItems.value.length***REMOVED*** {
+                fetchConversationHistory(
+                    isInit,
+                    conversationItems,
+                    tableData,
+                    currentRenderIndex
+                ***REMOVED***
+            ***REMOVED***
+
             if (row.index == tableData.value.length - 1***REMOVED*** {
                 if (conversationItems.value.length === 0***REMOVED*** {
-                    // console.log('fetchConversationHistory'***REMOVED***
                     fetchConversationHistory(
                         isInit,
                         conversationItems,
@@ -507,7 +515,7 @@ const scrollToItem = (index: number***REMOVED*** => {
     //判断默认页面是否显示或对话历史是否初始化
     //(!showDefaultPage.value && !isInit.value***REMOVED*** ||
     if (conversationItems.value.length === 0***REMOVED*** {
-        console.log('fetchConversationHistory'***REMOVED***
+        // console.log('fetchConversationHistory'***REMOVED***
         fetchConversationHistory(
             isInit,
             conversationItems,
@@ -545,7 +553,9 @@ const query_dify_suggested = async (***REMOVED*** => {
     if (!isInit.value***REMOVED*** {
         const res = await GlobalAPI.dify_suggested(uuid.value***REMOVED***
         const json = await res.json(***REMOVED***
-        suggested_array.value = json.data.data
+        if (json?.data?.data !== undefined***REMOVED*** {
+            suggested_array.value = json.data.data
+        ***REMOVED***
     ***REMOVED***
 
     // 滚动到底部
@@ -558,6 +568,51 @@ const onSuggested = (index: number***REMOVED*** => {
         onAqtiveChange('COMMON_QA'***REMOVED***
     ***REMOVED***
     handleCreateStylized(suggested_array.value[index]***REMOVED***
+***REMOVED***
+
+// 下拉菜单的选项
+const options = [
+  ***REMOVED***
+        label: (***REMOVED*** => h('span', null, '上传文档'***REMOVED***,
+        icon: (***REMOVED*** =>
+            h('div', {
+                class: 'i-vscode-icons:file-type-excel2',
+                style: 'inline-block:none'
+            ***REMOVED******REMOVED***,
+        key: 'excel'
+    ***REMOVED***,
+  ***REMOVED***
+        label: (***REMOVED*** => h('span', null, '上传图片'***REMOVED***,
+        icon: (***REMOVED*** =>
+            h('div', {
+                class: 'i-vscode-icons:file-type-image',
+                style: 'inline-block:none'
+            ***REMOVED******REMOVED***,
+        key: 'image'
+    ***REMOVED***
+]
+
+// 下拉菜单选项选择事件处理程序
+const uploadRef = ref<HTMLElement | null>(null***REMOVED***
+function handleSelect(key: string***REMOVED*** {
+    if (key === 'excel'***REMOVED*** {
+        // 使用 nextTick 确保 DOM 更新完成后执行
+        nextTick((***REMOVED*** => {
+            if (uploadRef.value***REMOVED*** {
+                // 尝试直接调用 n-upload 的点击方法
+                // 如果 n-upload 没有提供这样的方法，可以查找内部的 input 并调用 click 方法
+                const fileInput =
+                    uploadRef.value.$el.querySelector('input[type="file"]'***REMOVED***
+                if (fileInput***REMOVED*** {
+                    fileInput.click(***REMOVED***
+                ***REMOVED***
+            ***REMOVED***
+        ***REMOVED******REMOVED***
+    ***REMOVED*** else {
+        window.$ModalMessage.success('功能开发中', {
+            duration: 1500
+        ***REMOVED******REMOVED***
+    ***REMOVED***
 ***REMOVED***
 ***REMOVED***
 ***REMOVED***
@@ -579,6 +634,7 @@ const onSuggested = (index: number***REMOVED*** => {
                         Roboto, 'Helvetica Neue', Arial, sans-serif;
                     font-weight: bold;
                     font-size: 14px;
+                    border-radius: 15px;
                 "
   ***REMOVED***
                 <template #icon>
@@ -888,11 +944,6 @@ const onSuggested = (index: number***REMOVED*** => {
                                         </n-icon>
                                     ***REMOVED***
                                   ***REMOVED***{ item.question ***REMOVED******REMOVED***
-                                    <!-- <template #avatar>
-                                        <n-avatar
-                                            src="https://cdnimg103.lizhi.fm/user/2017/02/04/2583325032200238082_160x160.jpg"
-                              ***REMOVED***
-                                    ***REMOVED*** -->
                                 </n-tag>
                             </n-space>
             ***REMOVED***
@@ -952,40 +1003,6 @@ const onSuggested = (index: number***REMOVED*** => {
                 p="60"
                 py="5"
   ***REMOVED***
-      ***REMOVED***style="margin-top: 40px">
-                    <n-upload
-                        type="button"
-                        :show-file-list="false"
-                        action="sanic/file/upload_file"
-                        accept=".xlsx,.xls,.csv"
-                        class="mr-2"
-                        v-on:finish="finish_upload"
-          ***REMOVED***
-                        <n-icon size="35">
-                            <svg
-                                t="1729566080604"
-                                class="icon"
-                                viewBox="0 0 1024 1024"
-                                version="1.1"
-                                xmlns="http://www.w3.org/2000/svg"
-                                p-id="38910"
-                                width="64"
-                                height="64"
-                  ***REMOVED***
-                                <path
-                                    d="M856.448 606.72v191.744a31.552 31.552 0 0 1-31.488 31.488H194.624a31.552 31.552 0 0 1-31.488-31.488V606.72a31.488 31.488 0 1 1 62.976 0v160.256h567.36V606.72a31.488 31.488 0 1 1 62.976 0zM359.872 381.248c-8.192 0-10.56-5.184-5.376-11.392L500.48 193.152a11.776 11.776 0 0 1 18.752 0l145.856 176.704c5.184 6.272 2.752 11.392-5.376 11.392H359.872z"
-                                    fill="#838384"
-                                    p-id="38911"
-                      ***REMOVED***</path>
-                                <path
-                                    d="M540.288 637.248a30.464 30.464 0 1 1-61.056 0V342.656a30.464 30.464 0 1 1 61.056 0v294.592z"
-                                    fill="#838384"
-                                    p-id="38912"
-                      ***REMOVED***</path>
-                            </svg>
-                        </n-icon>
-                    </n-upload>
-    ***REMOVED***
                 <div
                     style="
                         position: relative;
@@ -999,7 +1016,7 @@ const onSuggested = (index: number***REMOVED*** => {
                             style="
                               ***REMOVED***
                                 gap: 10px;
-                                margin-left: 5px;
+                                margin-left: 5%;
                                 margin-bottom: 5px;
                             "
               ***REMOVED***
@@ -1211,9 +1228,12 @@ const onSuggested = (index: number***REMOVED*** => {
                             class="textarea-resize-none text-15"
                             :style="{
                                 '--n-border-radius': '20px',
-                                '--n-padding-left': '20px',
+                                '--n-padding-left': '60px',
                                 '--n-padding-right': '20px',
-                                '--n-padding-vertical': '15px'
+                                '--n-padding-vertical': '15px',
+                                width: '90%',
+                                marginLeft: '5%',
+                                align: 'center'
                             ***REMOVED***"
                             :placeholder="placeholder"
                             :autosize="{
@@ -1221,10 +1241,59 @@ const onSuggested = (index: number***REMOVED*** => {
                                 maxRows: 5
                             ***REMOVED***"
               ***REMOVED***
+                        <div
+                            style="
+                                transform: translateY(-50%***REMOVED***;
+                                position: absolute;
+                                margin-left: 6%;
+                                top: 62%;
+                            "
+              ***REMOVED***
+                            <n-dropdown
+                                :options="options"
+                                @select="handleSelect"
+                  ***REMOVED***
+                                <n-icon size="30">
+                                    <svg
+                                        t="1729566080604"
+                                        class="icon"
+                                        viewBox="0 0 1024 1024"
+                                        version="1.1"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        p-id="38910"
+                                        width="64"
+                                        height="64"
+                          ***REMOVED***
+                                        <path
+                                            d="M856.448 606.72v191.744a31.552 31.552 0 0 1-31.488 31.488H194.624a31.552 31.552 0 0 1-31.488-31.488V606.72a31.488 31.488 0 1 1 62.976 0v160.256h567.36V606.72a31.488 31.488 0 1 1 62.976 0zM359.872 381.248c-8.192 0-10.56-5.184-5.376-11.392L500.48 193.152a11.776 11.776 0 0 1 18.752 0l145.856 176.704c5.184 6.272 2.752 11.392-5.376 11.392H359.872z"
+                                            fill="#838384"
+                                            p-id="38911"
+                              ***REMOVED***</path>
+                                        <path
+                                            d="M540.288 637.248a30.464 30.464 0 1 1-61.056 0V342.656a30.464 30.464 0 1 1 61.056 0v294.592z"
+                                            fill="#838384"
+                                            p-id="38912"
+                              ***REMOVED***</path>
+                                    </svg>
+                                </n-icon>
+                            </n-dropdown>
+                            <!-- 隐藏的文件上传按钮 -->
+                            <n-upload
+                                ref="uploadRef"
+                                type="button"
+                                :show-file-list="false"
+                                action="sanic/file/upload_file"
+                                accept=".xlsx,.xls,.csv"
+                                style="display: none"
+                                @finish="finish_upload"
+                  ***REMOVED***
+                                选择文件
+                            </n-upload>
+            ***REMOVED***
                         <n-float-button
                             position="absolute"
-                            :right="22"
-                            top="62%"
+                            :right="75"
+                            top="59%"
                             :type="stylizingLoading ? 'primary' : 'default'"
                             color
                             :class="[

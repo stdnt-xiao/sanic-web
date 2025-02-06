@@ -14,6 +14,22 @@ const logout = (***REMOVED*** => {
         router.push('/login'***REMOVED***
     ***REMOVED***, 500***REMOVED***
 ***REMOVED***
+const handleClickEfficiency = (index***REMOVED*** => {
+    router.push('/testAssitant'***REMOVED***
+***REMOVED***
+
+const handleClickChat = (index***REMOVED*** => {
+    router.push('/chat'***REMOVED***
+***REMOVED***
+
+// 使用ref定义响应式的selectedIndex
+const selectedIndex = ref(0***REMOVED***
+onMounted((***REMOVED*** => {
+    // 初始化selectedIndex为0
+    router.currentRoute.value.path === '/testAssitant'
+        ? (selectedIndex.value = 2***REMOVED***
+        : (selectedIndex.value = 1***REMOVED***
+***REMOVED******REMOVED***
 ***REMOVED***
 
 ***REMOVED***
@@ -34,14 +50,14 @@ const logout = (***REMOVED*** => {
                     <section
                         v-if="$slots.left"
                         flex="~ col"
-                        w-60
+                        w-70
                         h-full
                         overflow-hidden
                         style="
                             background: linear-gradient(
                                 to bottom,
-                                #5e58e7,
-                                white
+                                #8874f1,
+                                #588af9
                             ***REMOVED***;
                             position: relative;
                         "
@@ -49,11 +65,11 @@ const logout = (***REMOVED*** => {
                         <!-- 最侧边图标设置 -->
               ***REMOVED***class="first-container">
                             <n-icon
-                                size="35"
+                                size="40"
                                 style="
-                                    margin: 10%;
+                                    margin: 15%;
                                     margin-top: 15px;
-                                  ***REMOVED***
+                                    margin-bottom: 5px;
                                 "
                   ***REMOVED***
                                 <svg
@@ -95,8 +111,10 @@ const logout = (***REMOVED*** => {
 
                   ***REMOVED***
                             <div
-                                class="icon-button selected"
+                                class="icon-button"
+                                :class="{ selected: selectedIndex === 1 ***REMOVED***"
                                 style="margin-bottom: 10px"
+                                @click="handleClickChat(1***REMOVED***"
                   ***REMOVED***
                                 <n-icon size="20" class="icon">
                                     <svg
@@ -134,7 +152,9 @@ const logout = (***REMOVED*** => {
               ***REMOVED***class="efficiency-container">
                             <div
                                 class="icon-button"
+                                :class="{ selected: selectedIndex === 2 ***REMOVED***"
                                 style="margin-bottom: 10px"
+                                @click="handleClickEfficiency(2***REMOVED***"
                   ***REMOVED***
                                 <n-icon size="25" class="icon">
                                     <svg
@@ -213,8 +233,8 @@ const logout = (***REMOVED*** => {
                                     size="35"
                                     style="
                                         position: absolute;
-                                        bottom: 15px;
-                                        margin: 15%;
+                                        bottom: 10px;
+                                        margin: 20%;
                                     "
                       ***REMOVED***
                                     <svg
@@ -348,16 +368,6 @@ const logout = (***REMOVED*** => {
                                 </n-button>
                             ***REMOVED***
                         </n-tooltip>
-                    </section>
-                    <!-- <n-divider vertical style="height: 100%" /> -->
-                    <section
-                        v-if="$slots.left"
-                        flex="~ col"
-                        w-220
-                        h-full
-                        overflow-hidden
-          ***REMOVED***
-                        <slot name="left"></slot>
                     </section>
                     <section flex="1" h-full overflow-hidden>
                         <slot name="default"></slot>

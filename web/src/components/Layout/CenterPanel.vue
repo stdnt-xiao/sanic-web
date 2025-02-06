@@ -1,38 +1,10 @@
-<script lang="ts" setup>
-import { systemTitle ***REMOVED*** from '@/base'
-const isCollapsed = ref(false***REMOVED***
-***REMOVED***
-
 ***REMOVED***
     <LayoutSlotCenterPanel v-bind="$attrs">
-        <template v-if="$slots.sidebar" #left>
-            <div
-                min-h-0
-                flex="1 ~ col"
-                :class="[
-                    'select-none',
-                    'bg-no-repeat bg-cover bg-right',
-                    'bg-bgcolor'
-            ***REMOVED***"
-                style="background-color: #ffffff"
-  ***REMOVED***
-      ***REMOVED***v-if="$slots['sidebar-header']" py="2px">
-                    <slot name="sidebar-header"></slot>
-    ***REMOVED***
-                <div
-                    class="scrollable-sidebar"
-                    flex="1"
-                    p="5px"
-                    overflow-y-auto
-      ***REMOVED***
-                    <slot name="sidebar"></slot>
-    ***REMOVED***
-      ***REMOVED***py="14px" px="20px">
-                    <slot name="sidebar-action"></slot>
-    ***REMOVED***
-***REMOVED***
-        ***REMOVED***
-        <div h-full bg="#fefbff">
+        <template #left> ***REMOVED***
+        <div
+            h-full
+            style="background: linear-gradient(to bottom, #8874f1, #588af9***REMOVED***"
+        >
             <slot name="default"></slot>
 ***REMOVED***
     </LayoutSlotCenterPanel>

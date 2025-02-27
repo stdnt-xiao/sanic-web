@@ -237,14 +237,33 @@ async def abstract_doc_func(response, doc_id***REMOVED***:
         meta_dict = mysql_client.query_mysql_dict(sql***REMOVED***
         total_steps = len(meta_dict***REMOVED***
 
-        for step, item in enumerate(meta_dict***REMOVED***:
-            await response.write(f'data: {{"type": "progress", "progress": {step*10***REMOVED***, "total": {total_steps***REMOVED******REMOVED******REMOVED***\n\n'***REMOVED***
-            await response.write(f'data: {{"type": "log", "message": "{"#### 模块: "+item["page_title"]***REMOVED***"***REMOVED******REMOVED***\n\n'***REMOVED***
+        # 确定每个步骤应该增加的百分比
+        step_percentage = 10 if total_steps <= 10 else (100 / total_steps***REMOVED***
 
-            # 使用 run_in_executor 在单独的线程中运行 extract_function 避免阻塞主线程
+        function_array = []
+        for step, item in enumerate(meta_dict***REMOVED***:
+            # 计算当前进度，如果是最后一步，则直接设为100%
+            current_progress = min(100, int((step + 1***REMOVED*** * step_percentage***REMOVED******REMOVED***
+            await response.write(f'data: {{"type": "progress", "progress": {current_progress***REMOVED***, "total": 100***REMOVED******REMOVED***\n\n'***REMOVED***
+            await response.write(f'data: {{"type": "log", "message": "{"#### 模块: " + item["page_title"]***REMOVED***"***REMOVED******REMOVED***\n\n'***REMOVED***
+
+            # 这里避免阻塞主线程
             loop = asyncio.get_running_loop(***REMOVED***
             answer = await loop.run_in_executor(executor, extract_function, item["page_content"]***REMOVED***
-            for index, func in enumerate(json.loads(answer***REMOVED******REMOVED***:
+
+            case_info = {
+                "demand_id": item["demand_id"],
+                "section_id": item["id"],
+                "section_name": item["page_title"],
+                "fun_names": [],
+            ***REMOVED***
+
+            logger.info(answer***REMOVED***
+            answer_arr = json.loads(answer.strip("```json\n"***REMOVED***.strip("\n```"***REMOVED******REMOVED***
+            case_info["fun_names"].extend(answer_arr***REMOVED***
+            function_array.append(case_info***REMOVED***
+
+            for index, func in enumerate(answer_arr***REMOVED***:
                 await response.write(
                     "data:"
                     + json.dumps(
@@ -265,9 +284,52 @@ async def abstract_doc_func(response, doc_id***REMOVED***:
         # 完成后发送完成标志
         await response.write('data: {"type": "complete"***REMOVED***\n\n'***REMOVED***
         await response.write("\n\n"***REMOVED***
+
+        logger.info(function_array***REMOVED***
+        update_functions(doc_id, function_array***REMOVED***
+        insert_demand_case(doc_id, function_array***REMOVED***
     except Exception as e:
         logging.error(f"Error Invoke diFy: {e***REMOVED***"***REMOVED***
         traceback.print_exception(e***REMOVED***
+
+
+def update_functions(doc_id, function_array***REMOVED***:
+    """
+    更新功能点数量
+    :param doc_id:
+    :param function_array:
+    :return:
+    """
+    functions = sum(len(item["fun_names"]***REMOVED*** for item in function_array***REMOVED***
+    sql = f"""update t_demand_manager set fun_num={functions***REMOVED***,update_time='{datetime.now(***REMOVED******REMOVED***' where id={doc_id***REMOVED***"""
+    mysql_client.update(sql***REMOVED***
+
+
+def insert_demand_case(doc_id, function_array***REMOVED***:
+    """
+        添加功能点信息
+    :param doc_id:
+    :param function_array:
+    :return:
+    """
+
+    # 先删除数据
+    delete_sql = f"""delete from t_demand_case where demand_id={doc_id***REMOVED***"""
+    mysql_client.execute_mysql(delete_sql***REMOVED***
+
+    # 插入数据的SQL语句
+    insert_query = """
+    INSERT INTO t_demand_case (demand_id, section_id, section_name, fun_name, create_time, update_time***REMOVED***
+    VALUES (%s, %s, %s, %s, %s, %s***REMOVED***
+    """
+
+    # 准备批量插入的数据
+    values_to_insert = []
+    for item in function_array:
+        for fun_name in item["fun_names"]:
+            values_to_insert.append((doc_id, item["section_id"], item["section_name"], fun_name, datetime.now(***REMOVED***, datetime.now(***REMOVED******REMOVED******REMOVED***
+
+    mysql_client.batch_insert(insert_query, values_to_insert***REMOVED***
 
 
 result_format = """["功能点1","功能点2"]"""
@@ -290,7 +352,10 @@ def build_prompt(doc_content***REMOVED*** -> str:
     - 严格依据需求文档内容回答不要虚构
     - 每个功能点信息字数限制在30字以内
     - 根据需求文档内容尽量列举出所有功能点信息
-    确保只以JSON格式回答，具体格式如下:{result_format***REMOVED***
+    - 不要输出思考过程信息
+    # 返回格式
+    请一步步思考并按照以下JSON格式回复：{result_format***REMOVED***
+    确保返回正确的json并且可以被Python json.loads方法解析.
     """
     return prompt_content
 
@@ -309,7 +374,7 @@ def extract_function(doc_content***REMOVED***:
         "model": "qwen2.5",
         "stream": False,
         "think_output": False,
-        "max_tokens": 40960,
+        "max_tokens": 8192,
         "temperature": 0,
         "top_k": 1,
         "top_p": 0.9,

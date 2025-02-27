@@ -34,10 +34,10 @@
             ***REMOVED***
               ***REMOVED***class="card-footer">
                             <span class="card-info"
-                      ***REMOVED***抽取功能: {{ item.fun_num ***REMOVED******REMOVED***</span
+                      ***REMOVED***功能点: {{ item.fun_num ***REMOVED******REMOVED***</span
                   ***REMOVED***
                             <span class="card-date">{{
-                                item.create_time
+                                item.update_time
                             ***REMOVED******REMOVED***</span>
                             <!-- 使用 n-dropdown 组件替换原有的按钮 -->
                             <n-dropdown
@@ -179,6 +179,7 @@ function startExtraction(itemId***REMOVED*** {
             setTimeout((***REMOVED*** => {
                 showAbModal.value = false
                 messages.value = []
+                query_demand_records(***REMOVED***
             ***REMOVED***, 1000***REMOVED***
         ***REMOVED***
         scrollToBottom(***REMOVED*** // 每次收到消息后滚动到底部
@@ -319,7 +320,7 @@ onMounted((***REMOVED*** => {
 
 .card {
     width: 250px;
-    margin-top: 40px;
+  ***REMOVED***
   ***REMOVED***
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1***REMOVED***;
     background-color: #ffffff;

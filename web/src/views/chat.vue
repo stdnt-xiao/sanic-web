@@ -59,6 +59,9 @@ function newChat(***REMOVED*** {
     conversationItems.value = []
     stylizingLoading.value = false
     suggested_array.value = []
+
+    // 新增：生成当前问答类型的新uuid
+    uuids.value[qa_type.value] = uuidv4(***REMOVED***
 ***REMOVED***
 
 /**
@@ -228,7 +231,8 @@ const contentLoadingStates = ref(
 // ***REMOVED***
 
 // chat_id定义
-const uuid = ref(''***REMOVED***
+const uuids = ref<Record<string, string>>({***REMOVED******REMOVED*** // 改为对象存储不同问答类型的uuid
+
 //提交对话
 const handleCreateStylized = async (send_text = ''***REMOVED*** => {
     // 滚动到底部
@@ -285,10 +289,14 @@ const handleCreateStylized = async (send_text = ''***REMOVED*** => {
         : send_text
     inputTextString.value = ''
 
+    if (!uuids.value[qa_type.value]***REMOVED*** {
+        uuids.value[qa_type.value] = uuidv4(***REMOVED***
+    ***REMOVED***
+
     if (textContent***REMOVED*** {
         // 存储该轮用户对话消息
         conversationItems.value.push({
-            chat_id: uuid.value,
+            chat_id: uuids.value[qa_type.value],
             qa_type: qa_type.value,
             question: textContent,
             file_key: '',
@@ -300,10 +308,9 @@ const handleCreateStylized = async (send_text = ''***REMOVED*** => {
         contentLoadingStates.value[currentRenderIndex.value] = true
     ***REMOVED***
 
-    uuid.value = uuidv4(***REMOVED***
     const { error, reader, needLogin ***REMOVED*** =
         await businessStore.createAssistantWriterStylized(
-            uuid.value,
+            uuids.value[qa_type.value],
             currentChatId.value,
           ***REMOVED***
                 text: textContent,
@@ -330,7 +337,7 @@ const handleCreateStylized = async (send_text = ''***REMOVED*** => {
         outputTextReader.value = reader
         // 存储该轮AI回复的消息
         conversationItems.value.push({
-            chat_id: uuid.value,
+            chat_id: uuids.value[qa_type.value],
             qa_type: qa_type.value,
             question: textContent,
             file_key: `${businessStore.$state.file_url***REMOVED***`,
@@ -541,6 +548,9 @@ const onAqtiveChange = (val***REMOVED*** => {
     qa_type.value = val
     businessStore.update_qa_type(val***REMOVED***
 
+    // 新增：切换类型时生成新uuid
+    uuids.value[val] = uuidv4(***REMOVED***
+
     //清空文件上传历史url
     if (val == 'FILEDATA_QA'***REMOVED*** {
         businessStore.update_file_url(''***REMOVED***
@@ -551,7 +561,7 @@ const onAqtiveChange = (val***REMOVED*** => {
 const suggested_array = ref([]***REMOVED***
 const query_dify_suggested = async (***REMOVED*** => {
     if (!isInit.value***REMOVED*** {
-        const res = await GlobalAPI.dify_suggested(uuid.value***REMOVED***
+        const res = await GlobalAPI.dify_suggested(uuids.value[qa_type.value]***REMOVED***
         const json = await res.json(***REMOVED***
         if (json?.data?.data !== undefined***REMOVED*** {
             suggested_array.value = json.data.data

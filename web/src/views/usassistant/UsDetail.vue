@@ -1,5 +1,4 @@
 <script setup lang="tsx">
-const loading = ref(false***REMOVED***
 const router = useRouter(***REMOVED***
 
 // 优化函数命名

@@ -6,34 +6,15 @@ withDefaults(defineProps<Props>(***REMOVED***, {
   loading: false,
 ***REMOVED******REMOVED***
 
-const userStore = useUserStore(***REMOVED***
 const router = useRouter(***REMOVED***
-const logout = (***REMOVED*** => {
-  userStore.logout(***REMOVED***
-  setTimeout((***REMOVED*** => {
-    router.push('/login'***REMOVED***
-  ***REMOVED***, 500***REMOVED***
-***REMOVED***
-const handleClickEfficiency = (index***REMOVED*** => {
-  router.push('/testAssitant'***REMOVED***
-***REMOVED***
+const userStore = useUserStore(***REMOVED***
+const appStore = useAppStore(***REMOVED***
 
-const handleClickChat = (index***REMOVED*** => {
-  router.push('/chat'***REMOVED***
-***REMOVED***
-
-const handleClick = (***REMOVED*** => {
-  router.push('/mcpChat'***REMOVED***
-***REMOVED***
-
-// 使用ref定义响应式的selectedIndex
-const selectedIndex = ref(0***REMOVED***
-onMounted((***REMOVED*** => {
-  // 初始化selectedIndex为0
-  router.currentRoute.value.path === '/testAssitant'
-    ? (selectedIndex.value = 2***REMOVED***
-    : (selectedIndex.value = 1***REMOVED***
-***REMOVED******REMOVED***
+appStore.areaLoading = true
+// 主页面加载提示
+setTimeout((***REMOVED*** => {
+  appStore.areaLoading = false
+***REMOVED***, 400***REMOVED***
 ***REMOVED***
 
 ***REMOVED***
@@ -49,7 +30,7 @@ onMounted((***REMOVED*** => {
           w-full
           h-full
           content-class="w-full h-full flex"
-          :show="false"
+          :show="appStore.areaLoading"
           :rotate="false"
           class="bg-#ffffff"
           :style="{

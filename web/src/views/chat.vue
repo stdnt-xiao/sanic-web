@@ -73,11 +73,6 @@ const currentChatId = computed((***REMOVED*** => {
   return route.params.chatId
 ***REMOVED******REMOVED***
 
-// 主页面加载提示
-const loading = ref(true***REMOVED***
-setTimeout((***REMOVED*** => {
-  loading.value = false
-***REMOVED******REMOVED***
 
 // 对话等待提示词图标
 const stylizingLoading = ref(false***REMOVED***

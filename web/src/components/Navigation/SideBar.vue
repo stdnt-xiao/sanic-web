@@ -161,7 +161,7 @@ const sidebarItems = ref([
 const handleLogout = (***REMOVED*** => {
   userStore.logout(***REMOVED***
   setTimeout((***REMOVED*** => {
-    router.push('/login'***REMOVED***
+    router.replace('/login'***REMOVED***
   ***REMOVED***, 500***REMOVED***
 ***REMOVED***
 ***REMOVED***

@@ -46,6 +46,7 @@ src/services/text2_sql_service.py
 src/services/user_service.py
 src/tests/__init__.py
 src/tests/autotest/doc.py
+src/tests/autotest/promot.py
 src/tests/chrome/selenium_test.py
 src/tests/crawl4ai/test.py
 src/tests/deepseek/doc_abstract.py
@@ -55,6 +56,7 @@ src/tests/langchain/langchain_test.py
 src/tests/llmlocal/llm_test.py
 src/tests/llmlocal/rerank_test.py
 src/tests/llmlocal/test_case.py
+src/tests/mcp/test.py
 src/tests/pandasai/pandas_ai_agent_test.py
 src/tests/pandasai/pandas_ai_execl_test.py
 src/tests/pandasai/pandas_ai_mysql_test.py

@@ -1,16 +1,13 @@
 <script lang="tsx" setup>
 ***REMOVED***
-***REMOVED*** // 假设存在 SseClientTransport
+***REMOVED***
 
 const message = ref(''***REMOVED***
 const messages = ref(''***REMOVED***
 const connectionStatus = ref('Disconnected'***REMOVED***
 // https://github.com/modelcontextprotocol/typescript-sdk
-// StdioClientTransport
-// 如果是本地开发，需要使用 localhost 来访问宿主机的mcp服务
 ***REMOVED***
-  // new URL('http://host.docker.internal:8000/sse'***REMOVED***,
-  new URL('http://localhost:3000/sse/amap'***REMOVED***,
+  new URL(`${location.origin***REMOVED***/sse`***REMOVED***,
 ***REMOVED***
 
 ***REMOVED***
@@ -32,14 +29,11 @@ onMounted(async (***REMOVED*** => {
   connectionStatus.value = 'Connected'
   const tools = await client.listTools(***REMOVED***
   console.log(tools***REMOVED***
-
-  // const prompts = await client.listPrompts(***REMOVED***
-  // console.log(prompts***REMOVED***
 ***REMOVED******REMOVED***
 
 const sendMessage = async (***REMOVED*** => {
   const result = await client.callTool({
-    name: 'maps_weather',
+    name: 'amap-maps_weather',
     arguments: {
       city: message.value,
     ***REMOVED***,
@@ -48,8 +42,12 @@ const sendMessage = async (***REMOVED*** => {
   console.log(result.content***REMOVED***
 ***REMOVED***
 
+
+
+
 // List prompts
 // const prompts = await client.listPrompts(***REMOVED***
+// console.log(prompts***REMOVED***
 
 // // Get a prompt
 // const prompt = await client.getPrompt('example-prompt', {
@@ -65,28 +63,6 @@ const sendMessage = async (***REMOVED*** => {
 
 ***REMOVED***
 ***REMOVED***
-    <!-- 移动说明区块到 n-layout 外部 -->
-    <div class="note-box">
-      <p>MCP功能说明：</p>
-      <ul>
-        <li>
-          目前该功能只做了简单的客户端对接示例;
-          下一版本对接qwen3mcp能力实现多工具协调调用
-        </li>
-        <li>
-          第一步 申请高德API-KEY 并启动高德 MCP Server，命令如下：
-        </li>
-        <li>
-          npx -y supergateway --stdio
-          "AMAP_MAPS_API_KEY=高德API-KEY npx -y
-          @amap/amap-maps-mcp-server" --cors
-        </li>
-        <li>
-          通过 maps_weather 工具查询实时天气,输出城市名称如:杭州
-        </li>
-      </ul>
-***REMOVED***
-
     <div class="mcp-client">
       <h1>MCP Client</h1>
       <p>Connection Status: {{ connectionStatus ***REMOVED******REMOVED***</p>

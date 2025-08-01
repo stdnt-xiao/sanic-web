@@ -40,6 +40,8 @@ dependencies = [
     "lxml>=5.3.1,<6.0.0",
     "selenium-stealth>=1.0.6,<2.0.0",
     "pymysql>=1.1.1",
+    "mcp>=1.12.2",
+    "openai>=1.97.0",
 ]
 
 [project.urls]

@@ -37,7 +37,7 @@ const childrenRoutes: Array<RouteRecordRaw> = [
 ***REMOVED***
     path: 'mcpChat',
     name: 'McpChat',
-    component: (***REMOVED*** => import('@/views/mcp/MCPClient.vue'***REMOVED***,
+    component: (***REMOVED*** => import('@/views/mcp/ToolAgent.vue'***REMOVED***,
     meta: { requiresAuth: true ***REMOVED***, // 标记需要认证
   ***REMOVED***,
 ]

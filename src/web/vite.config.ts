@@ -38,6 +38,16 @@ export default defineConfig(({ mode ***REMOVED******REMOVED*** => {
           ws: true,
           rewrite: (path***REMOVED*** => path.replace(/^\/sanic/, ''***REMOVED***,
         ***REMOVED***,
+        '/sse': {
+          target: 'http://localhost:3300',
+          ws: true,
+          rewrite: (path***REMOVED*** => path.replace(/^\/sse/, 'sse'***REMOVED***,
+        ***REMOVED***,
+        '/messages': {
+          target: 'http://localhost:3300',
+          ws: true,
+          rewrite: (path***REMOVED*** => path.replace(/^\/messages/, 'messages'***REMOVED***,
+        ***REMOVED***
       ***REMOVED***,
     ***REMOVED***,
     plugins: [

@@ -1,5 +1,5 @@
 # 构建阶段
-FROM python:3.10-slim-bookworm AS builder
+FROM python:3.11-slim-bookworm AS builder
 WORKDIR /sanic-web
 
 # 设置清华源 + 添加 PATH
@@ -25,7 +25,7 @@ RUN set -eux; \
     rm -rf /var/lib/apt/lists/*
 
 # 最终运行阶段
-FROM python:3.10-slim-bookworm
+FROM python:3.11-slim-bookworm
 WORKDIR /sanic-web
 
 # 复制构建结果

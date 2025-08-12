@@ -3,13 +3,14 @@ import logging
 import os
 import traceback
 from datetime import datetime, timedelta
+from typing import List
 
 import jwt
 import requests
 
 from common.exception import MyException
 from common.mysql_util import MysqlUtil
-from constants.code_enum import SysCodeEnum, DiFyAppEnum
+from constants.code_enum import SysCodeEnum, DiFyAppEnum, DataTypeEnum
 from constants.dify_rest_api import DiFyRestApi
 
 logger = logging.getLogger(__name__)
@@ -86,7 +87,9 @@ async def get_user_info(request) -> dict:
     return user_info
 
 
-async def add_question_record(uuid_str, user_token, conversation_id, message_id, task_id, chat_id, question, t02_answer, t04_answer, qa_type):
+async def add_question_record(
+    uuid_str, user_token, conversation_id, message_id, task_id, chat_id, question, t02_answer, t04_answer, qa_type
+):
     """
     @:param uuid_str: 唯一ID
     @param user_token: 用户token
@@ -141,6 +144,43 @@ async def add_question_record(uuid_str, user_token, conversation_id, message_id,
     except Exception as e:
         traceback.print_exception(e)
         logger.error(f"保存用户问答日志失败: {e}")
+
+
+async def add_user_record(
+    uuid_str: str, chat_id: int, question: str, to2_answer: List[str], qa_type: str, user_token: str
+):
+    """
+    新增用户问答记录
+    """
+    try:
+        # 1. 解析用户信息
+        user_info = await decode_jwt_token(user_token)
+        user_id = user_info.get("id")
+        if not user_id:
+            raise ValueError("Invalid user token: missing user_id")
+
+        # 2. 组装 answer 数据
+        t02_message_json = {
+            "data": {"messageType": "continue", "content": "".join(to2_answer or [])},
+            "dataType": DataTypeEnum.ANSWER.value[0],
+        }
+        answer_str = json.dumps(t02_message_json, ensure_ascii=False)
+
+        # 3. 插入数据库
+        insert_sql = """
+            INSERT INTO t_user_qa_record
+            (uuid, user_id, chat_id, question, to2_answer, qa_type)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """
+        insert_params = [uuid_str, user_id, chat_id, question, answer_str, DiFyAppEnum.COMMON_QA.value[0]]
+
+        # 如果 mysql_client.insert 是异步方法
+        mysql_client.insert(sql=insert_sql, params=insert_params)
+
+    except Exception as e:
+        # 建议替换成项目的日志系统
+        logger.error(f"Failed to insert user QA record: {e}", exc_info=True)
+        raise
 
 
 async def delete_user_record(user_id, record_ids):

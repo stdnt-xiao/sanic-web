@@ -134,7 +134,7 @@ const onCompletedReader = (index: number) => {
   }
 
   // 查询是推荐列表
-  if (isView.value == false) {
+  if (isView.value == false && qa_type.value != 'COMMON_QA') {
     query_dify_suggested()
   }
 }
@@ -1026,7 +1026,7 @@ const collapsed = useLocalStorage(
                         </svg>
                       </n-icon>
                     </template>
-                    深度思考
+                    智能问答
                   </n-button>
                   <n-button
                     type="default"

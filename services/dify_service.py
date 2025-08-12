@@ -7,6 +7,7 @@ import traceback
 import aiohttp
 import requests
 
+from agent.langgraph_react_agent import LangGraphReactAgent
 from common.exception import MyException
 from constants.code_enum import (
     DiFyAppEnum,
@@ -28,6 +29,9 @@ class QaContext:
         self.token = token
         self.question = question
         self.chat_id = chat_id
+
+
+agent = LangGraphReactAgent()
 
 
 class DiFyRequest:
@@ -71,6 +75,11 @@ class DiFyRequest:
 
             # 封装问答上下文信息
             qa_context = QaContext(token, cleaned_query, chat_id)
+
+            # 调用智能体
+            if qa_type == DiFyAppEnum.COMMON_QA.value[0]:
+                await agent.run_agent(query, res, chat_id, uuid_str, token)
+                return
 
             # 判断请求类别
             app_key = self._get_authorization_token(qa_type)
@@ -148,7 +157,11 @@ class DiFyRequest:
                                         if data_type == DataTypeEnum.ANSWER.value[0]:
                                             await self.send_message(
                                                 res,
-                                                {"data": {"messageType": "continue", "content": answer}, "dataType": data_type, "task_id": task_id},
+                                                {
+                                                    "data": {"messageType": "continue", "content": answer},
+                                                    "dataType": data_type,
+                                                    "task_id": task_id,
+                                                },
                                             )
 
                                             t02_answer_data.append(answer)
@@ -165,7 +178,10 @@ class DiFyRequest:
                                         "data:"
                                         + json.dumps(
                                             {
-                                                "data": {"messageType": "error", "content": "调用失败请查看dify日志,错误信息: " + error_msg},
+                                                "data": {
+                                                    "messageType": "error",
+                                                    "content": "调用失败请查看dify日志,错误信息: " + error_msg,
+                                                },
                                                 "dataType": DataTypeEnum.ANSWER.value[0],
                                             },
                                             ensure_ascii=False,
@@ -181,10 +197,24 @@ class DiFyRequest:
 
                                     if t02_message_json:
                                         await self._save_message(
-                                            t02_message_json, qa_context, conversation_id, message_id, task_id, qa_type, uuid_str
+                                            t02_message_json,
+                                            qa_context,
+                                            conversation_id,
+                                            message_id,
+                                            task_id,
+                                            qa_type,
+                                            uuid_str,
                                         )
                                     if t04_answer_data:
-                                        await self._save_message(t04_answer_data, qa_context, conversation_id, message_id, task_id, qa_type, uuid_str)
+                                        await self._save_message(
+                                            t04_answer_data,
+                                            qa_context,
+                                            conversation_id,
+                                            message_id,
+                                            task_id,
+                                            qa_type,
+                                            uuid_str,
+                                        )
 
                                     t02_answer_data = []
                                     t04_answer_data = {}
@@ -211,11 +241,29 @@ class DiFyRequest:
         # 保存用户问答记录 1.保存用户问题 2.保存用户答案 t02 和 t04
         if "content" in message["data"]:
             await add_question_record(
-                uuid_str, qa_context.token, conversation_id, message_id, task_id, qa_context.chat_id, qa_context.question, message, "", qa_type
+                uuid_str,
+                qa_context.token,
+                conversation_id,
+                message_id,
+                task_id,
+                qa_context.chat_id,
+                qa_context.question,
+                message,
+                "",
+                qa_type,
             )
         elif message["dataType"] == DataTypeEnum.BUS_DATA.value[0]:
             await add_question_record(
-                uuid_str, qa_context.token, conversation_id, message_id, task_id, qa_context.chat_id, qa_context.question, "", message, qa_type
+                uuid_str,
+                qa_context.token,
+                conversation_id,
+                message_id,
+                task_id,
+                qa_context.chat_id,
+                qa_context.question,
+                "",
+                message,
+                qa_type,
             )
 
     @staticmethod

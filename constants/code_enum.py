@@ -24,9 +24,9 @@ class DiFyAppEnum(Enum):
 
     FILEDATA_QA = ("FILEDATA_QA", "表格问答")
 
-    COMMON_QA = ("COMMON_QA", "通用问答")
+    COMMON_QA = ("COMMON_QA", "智能问答")
 
-    REPORT_QA = ("REPORT_QA", "报告问答")
+    REPORT_QA = ("REPORT_QA", "深度搜索")
 
 
 class DataTypeEnum(Enum):

@@ -5,9 +5,11 @@
 
 一个轻量级、支持全链路且易于二次开发的大模型应用项目 
 
-**已适配DeepSeek/Qwen2.5等大模型**
+**已集成MCP多智能体架构**
 
-基于 Dify 、Ollama&Vllm、Sanic 和 Text2SQL 📊 等技术构建的一站式大模型应用开发项目，采用 Vue3、TypeScript 和 Vite 5 打造现代UI。它支持通过 ECharts 📈 实现基于大模型的数据图形化问答，具备处理 CSV 文件 📂 表格问答的能力。同时，能方便对接第三方开源 RAG 系统 检索系统 🌐等，以支持广泛的通用知识问答。
+基于 Dify 、LangChain/LangGraph、Ollama&Vllm、Sanic 和 Text2SQL 📊 等技术构建的一站式大模型应用开发项目，采用 Vue3、TypeScript 和 Vite 5 打造现代UI。它支持通过 
+ECharts 📈 
+实现基于大模型的数据图形化问答，具备处理 CSV 文件 📂 表格问答的能力。同时，能方便对接第三方开源 RAG 系统 检索系统 🌐等，以支持广泛的通用知识问答。
 
 作为轻量级的大模型应用开发项目，Sanic-Web 🛠️ 支持快速迭代与扩展，助力大模型项目快速落地。🚀
 
@@ -46,7 +48,7 @@ https://github.com/user-attachments/assets/923758a3-4879-4836-852b-691413da372e
 ![image](./docker/images/app-01.png)
 
 ## 🎉 **特性**
-- **核心技术栈**：Dify + Ollama + RAG + (Qwen2.5/DeepSeek) + Text2SQL
+- **核心技术栈**：Dify + Ollama + RAG + (Qwen3/DeepSeek) + Text2SQL + MCP
 - **UI 框架**：Vue 3 + TypeScript + Vite 5
 - **数据问答**：集成 ECharts大模型实现Text2SQL轻量级的图形化数据问答展示
 - **表格问答**：支持 CSV格式文件的上传与基于大模型总结预处理和Text2SQL的表格数据问答
@@ -78,11 +80,9 @@ https://github.com/user-attachments/assets/923758a3-4879-4836-852b-691413da372e
 * Pnpm 9.x
 
 
-## 📚 **大模型部署**
-- [参考Ollama部署](https://qwen.readthedocs.io/zh-cn/latest/run_locally/ollama.html)
-- 模型: Qwen2.5 7B 模型
-- 模型: DeepSeek R1 7B 模型
-- [阿里云公网APIKEY形式](http://aliyun.com/product/bailian)
+## 📚 **大模型选择**
+- 购买公网大模型[阿里云公网大模型服务APIKEY](http://aliyun.com/product/bailian)
+- 模型要求: Qwen3/Qwen-Plus/Deepseek 模型
 
 ## ⚙️ **Dify环境配置**
 1. **安装Dify**
@@ -95,21 +95,34 @@ https://github.com/user-attachments/assets/923758a3-4879-4836-852b-691413da372e
    docker-compose up -d
    
 2. **Dify配置**
-   - 添加Dify大模型提供商Ollama,配置Qwen2.5模型和DeepSeek R1模型
-   - 导入项目根目录下的**docker/docker/dify/数据问答_v1.1.4_deepseek.yml画布** 
+   - 购买[阿里云公网大模型服务APIKEY](http://aliyun.com/product/bailian)
+   - 导入项目根目录下的**docker/docker/dify/数据问答_v1.1.5_qwen_plus.yml画布** 
    - 获取画布对应的api-key先复制出来下面步骤会使用
    - 导入画布后需要手动选择一下你本地配置的大模型并保存
 
 ![image](./docker/images/llm-setting.png)
-![image](./docker/images/llm-setting-deepseek.png)
 ![image](./docker/images/import-convas.png)
 ![image](./docker/images/convas-api-key.png)
-   
+
+## ⚙️ **MCP-HUB环境配置**
+1. **安装MCP-HUB**
+```bash
+git clone https://github.com/mcp-hub/mcp-hub.git
+cd docker/docker
+docker compose up -d mcphub
+```
+
+2. **MCP-HUB配置**
+- [登录MCP-HU](Bhttp://localhost:3300/) admin/admin123
+- 安装CMP工具
+![image](./docker/images/mcp-01.png)
+
+
 ## 🚀 **快速体验**
    - 具体步骤如下：
    - 第一步克隆代码到本地
-   - 第二步参考上面**大模型部署**先安装Ollama部署Qwen2.5模型或DeepSeek R1模型 或直接使用阿里云公网APIKEY形式
-   - 第三步Dify环境配置直接参考上面**Dify环境配置** **这步很重要!!!!**
+   - 第二步Dify环境配置直接参考上面**Dify环境配置** **这步很重要!!!!**
+   - 第三步确认Dify画布和大模型已经导入并配置成
    - 第四步启动服务具体步骤如下:
 
 1. **克隆仓库**
@@ -117,13 +130,17 @@ https://github.com/user-attachments/assets/923758a3-4879-4836-852b-691413da372e
    git clone https://github.com/apconw/sanic-web.git
 
 2. **启动服务**
-   - 修改docker-compose里的chat-service服务DIFY_开头的环境变量
-   - 修改**DIFY_DATABASE_QA_API_KEY** 获取Dify画布的api-key
-
-   ```bash
-   # 拉起前后端服务和中间件
-   cd /docker/docker
-   docker compose up -d
+   - 修改docker-compose里的环境变量(配置文件在docker/docker-compose.yml)
+      - 修改**DIFY_SERVER_URL** Dify服务地址,本地启动默认不用修改
+      - 修改**DIFY_DATABASE_QA_API_KEY** Dify智能体api-key,本地启动默认不用修改
+      - 修改**MODEL_BASE_URL** 公网大模型服务地址如使用阿里云公网大模型服务,默认不用修改
+      - 修改**MODEL_NAME** 大模型名称如Qwen-Plus
+      - 修改**MODEL_API_KEY** 大模型服务APIKEY
+      - 修改**MCP_HUB_URL** MCP_HUB服务地址本地启动,默认不用修改
+       ```bash
+       # 拉起前后端服务和中间件
+       cd /docker/docker
+       docker compose up -d
    
 3. **Minio配置**
    - 访问MinIO服务，http://localhost:19001/ 账号:admin 密码:12345678
@@ -159,7 +176,7 @@ https://github.com/user-attachments/assets/923758a3-4879-4836-852b-691413da372e
 
 ## 🛠️ **本地开发**
 - 第一步克隆代码到本地
-- 第二步参考上面**大模型部署**先安装Ollama部署Qwen2.5模型和DeepSeek R1模型 或直接使用阿里云公网APIKEY形式
+- 第二步参考上面**购买公网大模型服务APIKEY并在Dify中配置**
 - 第三步本地开发环境Dify配置，参考上面 **Dify环境配置里 获取Dify画布的api-key 同时修改.env.dev文件里面的DIFY_DATABASE_QA_API_KEY**
 - 第四步本地开发环境Minio配置,修改env.dev文件里面的Minio相关密钥信息
 - 第五步安装前后端项目依赖并启动前后端服务具体步骤如下:
@@ -191,23 +208,24 @@ https://github.com/user-attachments/assets/923758a3-4879-4836-852b-691413da372e
    uv sync --no-cache
    
    # pycharm 配置虚拟环境
-   File -> Settings -> Project: sanic-web -> Project Interpreter -> Add -> Existing environment
+   Settings -> Project: sanic-web -> Project Interpreter -> Add -> Existing environment
    选择.venv目录
-   
-   # pycharm 选择docker目录为项目根目录
-   File -> Settings -> Project: sanic-web -> Project Structure -> Sources
-   选择docker目录
-
 
 2. **安装中间件**
    ```bash
    cd docker/docker
-   docker compose up -d mysql minio
+   docker compose up -d mysql minio mcphub
    
-3. **Minio配置**
+3. **修改.env.dev配置文件**
+- 修改minio的配置
    - 访问MinIO服务，http://localhost:19001/ 账号:admin 密码:12345678
    - 创建一个bucket，名称filedata，同时配置Access Key
    - 修改.evn.dev里的MINIO_开头的密钥消息
+- 修改大模型&MCP-HUB配置
+  - 修改**MODEL_BASE_URL** 公网大模型服务地址如使用阿里云公网大模型服务,默认不用修改
+  - 修改**MODEL_NAME** 大模型名称如Qwen-Plus
+  - 修改**MODEL_API_KEY** 大模型服务APIKEY
+  - 修改**MCP_HUB_URL** MCP_HUB服务地址本地启动,默认不用修改
    
 4. **初始化数据库**
    - 如果使用本地环境mysql,初始化数据时需修改源码initialize_mysql，修改数据库连接信息即可

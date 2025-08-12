@@ -16,6 +16,7 @@ autodiscover(
     recursive=True,
 )
 
+
 app.route("/")(lambda _: empty())
 
 

@@ -1,13 +1,11 @@
 import json
 import logging
 import traceback
-from sys import platform
 from urllib.parse import urlparse
 
-import matplotlib
 import pandas as pd
+
 from common.date_util import DateEncoder
-from matplotlib import font_manager
 
 logger = logging.getLogger(__name__)
 

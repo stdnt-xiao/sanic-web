@@ -107,7 +107,7 @@ https://github.com/user-attachments/assets/923758a3-4879-4836-852b-691413da372e
 ## ⚙️ **MCP-HUB环境配置**
 1. **安装MCP-HUB**
 ```bash
-git clone https://github.com/mcp-hub/mcp-hub.git
+git clone https://github.com/apconw/sanic-web.git
 cd docker/docker
 docker compose up -d mcphub
 ```

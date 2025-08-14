@@ -1,3 +1,5 @@
+from sqlalchemy.inspection import inspect
+
 from model.db_connection_pool import get_db_pool
 
 db_pool = get_db_pool()
@@ -17,11 +19,13 @@ class DatabaseService:
         :return: 表结构
         """
         inspector = inspect(self.engine)
-        inspector.get_table_names()
         table_info = {}
 
         for table_name in inspector.get_table_names():
-            columns = {col["name"]: str(col["type"]) for col in inspector.get_columns(table_name)}
+            columns = {
+                col["name"]: {"type": str(col["type"]), "comment": str(col["comment"])}
+                for col in inspector.get_columns(table_name)
+            }
             foreign_keys = [
                 f"{fk['constrained_columns'][0]} -> {fk['referred_table']}.{fk['referred_columns'][0]}"
                 for fk in inspector.get_foreign_keys(table_name)

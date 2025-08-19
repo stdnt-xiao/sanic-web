@@ -6,7 +6,7 @@ from langchain.chat_models import init_chat_model
 from langgraph.prebuilt import create_react_agent
 
 
-async def data_render(state: AgentState, response):
+async def data_render(state: AgentState):
     """
     数据图表渲染
     :return:

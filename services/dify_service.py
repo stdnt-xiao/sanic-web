@@ -8,6 +8,7 @@ import aiohttp
 import requests
 
 from agent.langgraph_react_agent import LangGraphReactAgent
+from agent.text2sql.text2_sql_agent import Text2SqlAgent
 from common.exception import MyException
 from constants.code_enum import (
     DiFyAppEnum,
@@ -32,6 +33,7 @@ class QaContext:
 
 
 agent = LangGraphReactAgent()
+sql_agent = Text2SqlAgent()
 
 
 class DiFyRequest:
@@ -79,7 +81,10 @@ class DiFyRequest:
             # 调用智能体
             if qa_type == DiFyAppEnum.COMMON_QA.value[0]:
                 await agent.run_agent(query, res, chat_id, uuid_str, token)
-                return
+                return None
+            elif qa_type == DiFyAppEnum.DATABASE_QA.value[0]:
+                await sql_agent.run_agent(query, res)
+                return None
 
             # 判断请求类别
             app_key = self._get_authorization_token(qa_type)

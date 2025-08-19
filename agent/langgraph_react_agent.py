@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 import traceback
@@ -156,6 +157,10 @@ class LangGraphReactAgent:
                     content = message_chunk.content
                     t02_answer_data.append(content)
                     await response.write(self._create_response(content))
+                    # 确保实时输出
+                    if hasattr(response, "flush"):
+                        await response.flush()
+                    await asyncio.sleep(0)
 
             await add_user_record(
                 uuid_str, session_id, query, t02_answer_data, DataTypeEnum.ANSWER.value[0], user_token

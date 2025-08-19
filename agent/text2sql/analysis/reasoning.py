@@ -2,7 +2,7 @@ import logging
 
 from langchain.prompts import ChatPromptTemplate
 
-from agent.text2sql.llm_util import get_llm
+from agent.text2sql.analysis.llm_util import get_llm
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +47,7 @@ def create_reasoning_steps(state):
             }
         )
 
-        logger.info(f"Raw LLM response: {response.content}")
+        # logger.info(f"Raw LLM response: {response.content}")
 
         state["sql_reasoning"] = response.content
 

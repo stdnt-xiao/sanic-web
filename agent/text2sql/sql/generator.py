@@ -5,15 +5,15 @@ from langchain.prompts import ChatPromptTemplate
 from datetime import datetime
 import logging
 
-from agent.text2sql.llm_util import get_llm
+from agent.text2sql.analysis.llm_util import get_llm
 
 logger = logging.getLogger(__name__)
 
 
 def sql_generate(state):
-    logger.info("Creating sql query")
-    logger.info(f"User query: {state['user_query']}")
-    logger.info(f"Reasoning: {state['sql_reasoning']}")
+    # logger.info("Creating sql query")
+    # logger.info(f"User query: {state['user_query']}")
+    # logger.info(f"Reasoning: {state['sql_reasoning']}")
 
     llm = get_llm()
 
@@ -53,9 +53,9 @@ def sql_generate(state):
                 "sql_generation_reasoning": state["sql_reasoning"],
             }
         )
-        logger.info(f"Db Schema: {state['db_info']}")
-        logger.info(f"Raw LLM response: {response.content}")
-        logger.info(f"Attempts: {state['attempts']}")
+        # logger.info(f"Db Schema: {state['db_info']}")
+        # logger.info(f"Raw LLM response: {response.content}")
+        # logger.info(f"Attempts: {state['attempts']}")
 
         state["attempts"] += 1
         clean_json_str = response.content.strip().removeprefix("```json").strip().removesuffix("```").strip()

@@ -50,7 +50,8 @@ class DatabaseService:
 
         return state
 
-    def execute_sql(self, state: AgentState):
+    @staticmethod
+    def execute_sql(state: AgentState):
         """
         执行SQL
         :param state

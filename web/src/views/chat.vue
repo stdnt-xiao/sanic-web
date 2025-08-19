@@ -134,7 +134,7 @@ const onCompletedReader = (index: number) => {
   }
 
   // 查询是推荐列表
-  if (isView.value == false && qa_type.value != 'COMMON_QA') {
+  if (isView.value == false && qa_type.value != 'COMMON_QA' && qa_type.value != 'DATABASE_QA') {
     query_dify_suggested()
   }
 }

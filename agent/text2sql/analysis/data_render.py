@@ -3,11 +3,13 @@ import os
 from langchain.chat_models import init_chat_model
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langgraph.prebuilt import create_react_agent
+from agent.text2sql.state.agent_state import AgentState
 
 
-async def data_render(result_data, char_type):
+async def data_render(state: AgentState):
     """
     数据图表渲染
+    mcphub 按group指定查询AntV-chart工具 减少上下文token
     :return:
     """
     client = MultiServerMCPClient(
@@ -19,7 +21,11 @@ async def data_render(result_data, char_type):
         }
     )
 
+    # 过滤工具减少token和大模型幻觉问题
+    char_type_ = state["char_type"]
     tools = await client.get_tools()
+    tools = [tool for tool in tools if tool.name == char_type_]
+
     llm = init_chat_model(
         model="openai:qwen-plus",
         temperature=0.5,
@@ -27,11 +33,13 @@ async def data_render(result_data, char_type):
         api_key=os.getenv("MODEL_API_KEY"),
     )
 
+    result_data = state["execution_result"]
     chart_agent = create_react_agent(
         model=llm,
         tools=tools,
         prompt=f"""
             你是一个经验丰富的BI专家,擅长根据原始数据选择合适的mcp图表工具进行渲染.
+            请根据原始数据进行选择，并返回markdown格式的图表图片的url.
             ----
             {result_data}
             ----
@@ -43,23 +51,6 @@ async def data_render(result_data, char_type):
         config={"configurable": {"thread_id": "chart-render"}},
     )
 
-    return result["messages"][-1].content
+    state["chart_url"] = result["messages"][-1].content
 
-    # async for message_chunk, metadata in chart_agent.astream(
-    #     input={"messages": [("user", "根据原始数据选择合适的mcp图表工具进行渲染")]},
-    #     config={"configurable": {"thread_id": "chart-render"}},
-    #     stream_mode="messages",
-    # ):
-    #     # print(message_chunk)
-    #     # 工具输出
-    #     if metadata["langgraph_node"] == "tools":
-    #         tool_name = message_chunk.name or "未知工具"
-    #         tool_use = "> 调用工具:" + tool_name + "\n\n"
-    #         print(tool_use)
-    #         continue
-    #
-    #     if message_chunk.content:
-    #         content = message_chunk.content
-    #         print(message_chunk)
-    #
-    # return state
+    return state

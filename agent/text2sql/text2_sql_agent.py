@@ -30,22 +30,140 @@ class Text2SqlAgent:
         try:
             initial_state = AgentState(user_query=text, attempts=0, correct_attempts=0)
             graph: CompiledStateGraph = create_graph()
-            # for chunk, metadata in graph.stream(initial_state, stream_mode="messages"):
-            #     if chunk.content:
-            #         logger.info(f"metadata->: {metadata}")
-            #         logger.info(f"chunk->: {chunk.content}")
-            #         await response.write(self._create_response(chunk.content))
-            #         if hasattr(response, "flush"):
-            #             await response.flush()
-            #         await asyncio.sleep(0)
-            final_state = graph.invoke(input=initial_state, stream_mode="values")
-            print(final_state)
-            char_url = await data_render(final_state["execution_result"], final_state["char_type"])
-            # await response.write(self._create_response(final_state["sql_reasoning"]))
-            await response.write(self._create_response(char_url))
-            # if hasattr(response, "flush"):
-            #     await response.flush()
-            # await asyncio.sleep(0)
+            print("所有节点:", list(graph.nodes.keys()))
+            current_step = None
+            async for chunk_dict in graph.astream(initial_state, stream_mode="updates"):
+                print(chunk_dict)
+                #     print(f"metadata->:{metadata}")
+                #     # print(f"metadata->:{chunk}")
+                # if metadata["langgraph_node"] == "tools":
+                #     tool_name = chunk.name or "未知工具"
+                #     logger.info(f"工具调用结果:{chunk.content}")
+                #     tool_use = "\n > 调用工具:" + tool_name + "\n\n"
+                #     await response.write(self._create_response(tool_use))
+                #     continue
+
+                langgraph_step, step_value = next(iter(chunk_dict.items()))
+
+                # if langgraph_step == "agent":
+                #     continue
+
+                # 检测到步骤变更
+                if langgraph_step != current_step:
+                    # 如果之前有打开的步骤，先关闭它
+                    if current_step is not None and current_step not in ["summarize", "data_render"]:
+                        await response.write(
+                            "data:"
+                            + json.dumps(
+                                {
+                                    "data": {
+                                        "messageType": "continue",
+                                        "content": "</details>\n\n",
+                                    },
+                                    "dataType": "t02",
+                                },
+                                ensure_ascii=False,
+                            )
+                            + "\n\n"
+                        )
+
+                    # 打开新的步骤 (除了 summarize 和 data_render)
+                    if langgraph_step not in ["summarize", "data_render"]:
+                        think_html = f"""<details style="color:gray;background-color: #f8f8f8;padding: 2px;border-radius: 6px;margin-top:5px;">
+                                     <summary>{langgraph_step}...</summary>"""
+                        formatted_message = {
+                            "data": {
+                                "messageType": "continue",
+                                "content": think_html,
+                            },
+                            "dataType": "t02",
+                        }
+                        await response.write("data:" + json.dumps(formatted_message, ensure_ascii=False) + "\n\n")
+                    current_step = langgraph_step
+
+                if step_value:
+                    if langgraph_step == "schema_inspector":
+                        await response.write(self._create_response(f"共检索{len(step_value['db_info'])}张表."))
+                        if hasattr(response, "flush"):
+                            await response.flush()
+                        await asyncio.sleep(0)
+                    elif langgraph_step == "llm_reasoning":
+                        await response.write(self._create_response(step_value["sql_reasoning"]))
+                        if hasattr(response, "flush"):
+                            await response.flush()
+                        await asyncio.sleep(0)
+                    elif langgraph_step == "sql_generator":
+                        await response.write(self._create_response(step_value["generated_sql"]))
+                        if hasattr(response, "flush"):
+                            await response.flush()
+                        await asyncio.sleep(0)
+                    elif langgraph_step == "sql_executor":
+                        await response.write(self._create_response("执行sql语句成功"))
+                        if hasattr(response, "flush"):
+                            await response.flush()
+                        await asyncio.sleep(0)
+                    elif langgraph_step == "summarize":
+                        # 关闭之前的details标签（如果有的话）
+                        if current_step is not None and current_step not in ["summarize", "data_render"]:
+                            await response.write(
+                                "data:"
+                                + json.dumps(
+                                    {
+                                        "data": {
+                                            "messageType": "continue",
+                                            "content": "</details>\n\n",
+                                        },
+                                        "dataType": "t02",
+                                    },
+                                    ensure_ascii=False,
+                                )
+                                + "\n\n"
+                            )
+                        await response.write(self._create_response(step_value["report_summary"]))
+                        if hasattr(response, "flush"):
+                            await response.flush()
+                        await asyncio.sleep(0)
+                        current_step = langgraph_step
+                    elif langgraph_step == "data_render":
+                        # 关闭之前的details标签（如果有的话）
+                        if current_step is not None and current_step not in ["summarize", "data_render"]:
+                            await response.write(
+                                "data:"
+                                + json.dumps(
+                                    {
+                                        "data": {
+                                            "messageType": "continue",
+                                            "content": "</details>\n\n",
+                                        },
+                                        "dataType": "t02",
+                                    },
+                                    ensure_ascii=False,
+                                )
+                                + "\n\n"
+                            )
+                        await response.write(self._create_response(step_value["chart_url"]))
+                        if hasattr(response, "flush"):
+                            await response.flush()
+                        await asyncio.sleep(0)
+                        current_step = langgraph_step
+
+            # 流结束时关闭最后的details标签
+            if current_step is not None and current_step not in ["summarize", "data_render"]:
+                await response.write(
+                    "data:"
+                    + json.dumps(
+                        {
+                            "data": {
+                                "messageType": "continue",
+                                "content": "</details>\n\n",
+                            },
+                            "dataType": "t02",
+                        },
+                        ensure_ascii=False,
+                    )
+                    + "\n\n"
+                )
+
         except Exception as e:
             traceback.print_exception(e)
             error_msg = f"处理过程中发生错误: {str(e)}"

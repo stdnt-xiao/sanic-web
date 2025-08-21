@@ -134,6 +134,9 @@ const onCompletedReader = (index: number) => {
     })
   }
 
+  console.log(qa_type.value)
+  console.log(isView.value)
+
   // 查询是推荐列表
   if (isView.value == false
     && qa_type.value != 'COMMON_QA'

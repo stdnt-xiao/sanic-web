@@ -18,9 +18,11 @@ class DatabaseService:
     """
 
     def __init__(self):
-        self.engine = db_pool.get_engine()
+        pass
+        # self.engine = db_pool.get_engine()
 
-    def get_table_schema(self, state: AgentState):
+    @staticmethod
+    def get_table_schema(state: AgentState):
         """
         @:param state
         :param state:
@@ -29,7 +31,8 @@ class DatabaseService:
         :return: 表schema信息
         """
         try:
-            inspector = inspect(self.engine)
+            logger.info("获取数据库表schema信息")
+            inspector = inspect(db_pool.get_engine())
             table_info = {}
 
             for table_name in inspector.get_table_names():

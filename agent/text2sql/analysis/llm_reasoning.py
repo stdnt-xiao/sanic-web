@@ -6,6 +6,10 @@ from agent.text2sql.analysis.llm_util import get_llm
 
 logger = logging.getLogger(__name__)
 
+"""
+大模型推理节点
+"""
+
 
 def create_reasoning_steps(state):
     logger.info("Creating reasoning steps")

@@ -3,7 +3,7 @@ import logging
 import os
 import traceback
 from datetime import datetime, timedelta
-from typing import List
+from typing import List, Any
 
 import jwt
 import requests
@@ -164,7 +164,13 @@ async def add_question_record(
 
 
 async def add_user_record(
-    uuid_str: str, chat_id: int, question: str, to2_answer: List[str], qa_type: str, user_token: str
+    uuid_str: str,
+    chat_id: int,
+    question: str,
+    to2_answer: List[str],
+    to4_answer: dict[str, Any],
+    qa_type: str,
+    user_token: str,
 ):
     """
     新增用户问答记录
@@ -176,20 +182,29 @@ async def add_user_record(
         if not user_id:
             raise ValueError("Invalid user token: missing user_id")
 
-        # 2. 组装 answer 数据
+        # 2. 组装 answer 数据 - 修复部分：确保所有元素转换为字符串
+        t02_content = "".join(str(item) for item in (to2_answer or []))
         t02_message_json = {
-            "data": {"messageType": "continue", "content": "".join(to2_answer or [])},
+            "data": {"messageType": "continue", "content": t02_content},
             "dataType": DataTypeEnum.ANSWER.value[0],
         }
-        answer_str = json.dumps(t02_message_json, ensure_ascii=False)
+        t02_answer_str = json.dumps(t02_message_json, ensure_ascii=False)
 
         # 3. 插入数据库
         insert_sql = """
             INSERT INTO t_user_qa_record
-            (uuid, user_id, chat_id, question, to2_answer, qa_type)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            (uuid, user_id, chat_id, question, to2_answer,to4_answer, qa_type)
+            VALUES (%s, %s, %s, %s, %s, %s,%s)
         """
-        insert_params = [uuid_str, user_id, chat_id, question, answer_str, DiFyAppEnum.COMMON_QA.value[0]]
+        insert_params = [
+            uuid_str,
+            user_id,
+            chat_id,
+            question,
+            t02_answer_str,
+            json.dumps(to4_answer, ensure_ascii=False),
+            qa_type,
+        ]
 
         # 如果 mysql_client.insert 是异步方法
         mysql_client.insert(sql=insert_sql, params=insert_params)

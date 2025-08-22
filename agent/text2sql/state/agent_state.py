@@ -54,12 +54,13 @@ class AgentState(TypedDict):
     sql_reasoning: Optional[str]  # SQL 推理过程
     db_info: Optional[Dict]  # 数据库信息
     generated_sql: Optional[str]  # 生成的 SQL
-    validation_result: Optional[ValidationResult]  # SQL 验证结果
     execution_result: Optional[ExecutionResult]  # SQL 执行结果
+    validation_result: Optional[ValidationResult]  # SQL 验证结果
     evaluation_result: Optional[EvaluationResult]  # SQL 评估结果
     correction_result: Optional[SQLCorrectionResult]  # SQL 修正结果
     report_summary: Optional[str]  # 报告摘要
     attempts: int = 0  # 尝试次数
     correct_attempts: int = 0  # 正确尝试次数
-    chart_url: Optional[str]  # 图表地址
-    char_type: Optional[str]  # 图表类型
+    chart_url: Optional[str]  # AntV MCP图表地址
+    chart_type: Optional[str]  # 图表类型
+    apache_chart_data: Optional[Dict[str, Any]]  # Apache图表数据

@@ -12,7 +12,7 @@ from langchain_openai import ChatOpenAI
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.prebuilt import create_react_agent
 
-from constants.code_enum import DataTypeEnum
+from constants.code_enum import DataTypeEnum, DiFyAppEnum
 from services.user_service import add_user_record
 
 logger = logging.getLogger(__name__)
@@ -25,7 +25,13 @@ class LangGraphReactAgent:
 
     def __init__(self):
         # 校验并获取环境变量
-        required_env_vars = ["MODEL_NAME", "MODEL_TEMPERATURE", "MODEL_BASE_URL", "MODEL_API_KEY", "MCP_HUB_URL"]
+        required_env_vars = [
+            "MODEL_NAME",
+            "MODEL_TEMPERATURE",
+            "MODEL_BASE_URL",
+            "MODEL_API_KEY",
+            "COMMON_QA_GROUP_URL",
+        ]
         for var in required_env_vars:
             if not os.getenv(var):
                 raise ValueError(f"Missing required environment variable: {var}")
@@ -43,7 +49,7 @@ class LangGraphReactAgent:
             max_retries=int(os.getenv("MAX_RETRIES", 3)),
             streaming=os.getenv("STREAMING", "True").lower() == "true",
             # 将额外参数通过 extra_body 传递
-            extra_body={"enable_thinking": True},
+            extra_body={},
         )
 
         # 使用 os.path 构建路径
@@ -52,7 +58,7 @@ class LangGraphReactAgent:
         self.client = MultiServerMCPClient(
             {
                 "mcp-hub": {
-                    "url": os.getenv("MCP_HUB_URL"),
+                    "url": os.getenv("COMMON_QA_GROUP_URL"),
                     "transport": "streamable_http",
                 },
                 # "query_qa_record": {
@@ -148,7 +154,7 @@ class LangGraphReactAgent:
                 # 工具输出
                 if metadata["langgraph_node"] == "tools":
                     tool_name = message_chunk.name or "未知工具"
-                    logger.info(f"工具调用结果:{message_chunk.content}")
+                    # logger.info(f"工具调用结果:{message_chunk.content}")
                     tool_use = "> 调用工具:" + tool_name + "\n\n"
                     await response.write(self._create_response(tool_use))
                     t02_answer_data.append(tool_use)
@@ -167,7 +173,7 @@ class LangGraphReactAgent:
                     await asyncio.sleep(0)
 
             await add_user_record(
-                uuid_str, session_id, query, t02_answer_data, DataTypeEnum.ANSWER.value[0], user_token
+                uuid_str, session_id, query, t02_answer_data, {}, DiFyAppEnum.COMMON_QA.value[0], user_token
             )
         except Exception as e:
             print(f"[ERROR] Agent运行异常: {e}")

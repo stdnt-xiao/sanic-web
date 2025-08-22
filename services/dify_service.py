@@ -83,7 +83,7 @@ class DiFyRequest:
                 await agent.run_agent(query, res, chat_id, uuid_str, token)
                 return None
             elif qa_type == DiFyAppEnum.DATABASE_QA.value[0]:
-                await sql_agent.run_agent(query, res)
+                await sql_agent.run_agent(query, res, chat_id, uuid_str, token)
                 return None
 
             # 判断请求类别

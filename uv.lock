@@ -142,6 +142,7 @@ dependencies = [
     { name = "seaborn" },
     { name = "sqlacodegen" },
     { name = "sqlalchemy" },
+    { name = "sqlglot" },
 ]
 
 [package.metadata]
@@ -181,6 +182,7 @@ requires-dist = [
     { name = "seaborn", specifier = ">=0.13.2,<0.14.0" },
     { name = "sqlacodegen", specifier = ">=3.1.0" },
     { name = "sqlalchemy", specifier = ">=2.0.31,<3.0.0" },
+    { name = "sqlglot", specifier = ">=27.8.0" },
 ]
 
 [[package]]
@@ -1789,6 +1791,15 @@ wheels = [
     { url = "https://mirrors.aliyun.com/pypi/packages/04/61/c0d4607f7799efa8b8ea3c49b4621e861c8f5c41fd4b5b636c534fcb7d73/sqlalchemy-2.0.41-cp311-cp311-win32.whl", hash = "sha256:293cd444d82b18da48c9f71cd7005844dbbd06ca19be1ccf6779154439eec0b8" },
     { url = "https://mirrors.aliyun.com/pypi/packages/9d/8e/8344f8ae1cb6a479d0741c02cd4f666925b2bf02e2468ddaf5ce44111f30/sqlalchemy-2.0.41-cp311-cp311-win_amd64.whl", hash = "sha256:3d3549fc3e40667ec7199033a4e40a2f669898a00a7b18a931d3efb4c7900504" },
     { url = "https://mirrors.aliyun.com/pypi/packages/1c/fc/9ba22f01b5cdacc8f5ed0d22304718d2c758fce3fd49a5372b886a86f37c/sqlalchemy-2.0.41-py3-none-any.whl", hash = "sha256:57df5dc6fdb5ed1a88a1ed2195fd31927e705cad62dedd86b46972752a80f576" },
+]
+
+[[package]]
+name = "sqlglot"
+version = "27.8.0"
+source = { registry = "https://mirrors.aliyun.com/pypi/simple" }
+sdist = { url = "https://mirrors.aliyun.com/pypi/packages/ce/d6/dbe5a442ba5f0badf5d82f97fd4b83a7045bde563430d1bbfb90e7da5b71/sqlglot-27.8.0.tar.gz", hash = "sha256:026ca21be0106d23f67519d583a24131d27131ceb80b595efa2a59a2746f351f" }
+wheels = [
+    { url = "https://mirrors.aliyun.com/pypi/packages/0b/29/ffa987296beffe2ae7fc83c6fd9a62166d0abc4d2d16600605a5864c7d7f/sqlglot-27.8.0-py3-none-any.whl", hash = "sha256:3961277277bc5bae459762294e160b6b7ce998e7d016f5adf8311a1d50b7a1a7" },
 ]
 
 [[package]]

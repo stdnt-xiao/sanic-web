@@ -7,7 +7,6 @@ import { isMockDevelopment } from '@/config'
 import DefaultPage from './DefaultPage.vue'
 import SuggestedView from './SuggestedPage.vue'
 import TableModal from './TableModal.vue'
-import { Console } from 'console'
 
 const route = useRoute()
 const router = useRouter()
@@ -134,9 +133,6 @@ const onCompletedReader = (index: number) => {
     })
   }
 
-  console.log(qa_type.value)
-  console.log(isView.value)
-
   // 查询是推荐列表
   if (isView.value == false
     && qa_type.value != 'COMMON_QA'
@@ -159,7 +155,7 @@ const onChartReady = (index) => {
 const onRecycleQa = async (index: number) => {
   // 设置当前选中的问答类型
   const item = conversationItems.value[index]
-  onAqtiveChange(item.qa_type,'')
+  onAqtiveChange(item.qa_type,item.chat_id)
 
   if (item.qa_type === 'FILEDATA_QA') {
     businessStore.update_file_url(item.file_key)
@@ -580,9 +576,10 @@ const onAqtiveChange = (val,chat_id) => {
   qa_type.value = val
   businessStore.update_qa_type(val)
 
+
   // 新增：切换类型时生成新uuid
   if (chat_id) {
-     uuids.value[val] = chat_id
+    uuids.value[val] = chat_id
   } else {
       uuids.value[val] = uuidv4()
   }

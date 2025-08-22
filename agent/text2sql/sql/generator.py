@@ -61,12 +61,13 @@ def sql_generate(state):
         - generate_venn_chart: Generate a venn diagram, used to display relationships between sets, including intersections, unions, and differences.
         - generate_violin_chart: Generate a violin plot, used to display the distribution of data, combining features of boxplots and density plots to provide a more detailed view of the data distribution.
         - generate_word_cloud_chart: Generate a word-cloud, used to display the frequency of words in textual data, with font sizes indicating the frequency of each word.
-                
+        - generate_table: Generate a structured table, used to organize and present data in rows and columns, facilitating clear and concise information display for easy reading and analysis.
+        
         ### RESPONSE FORMAT (strict JSON) ###
         Respond only in the following JSON format:
         {{
             "sql_query": "Generated SQL query here",
-            "char_type": "Generated chart_type here"
+            "chart_type": "Generated chart_type here"
         }}
     """
     )
@@ -90,7 +91,7 @@ def sql_generate(state):
         clean_json_str = response.content.strip().removeprefix("```json").strip().removesuffix("```").strip()
         state["generated_sql"] = json.loads(clean_json_str)["sql_query"]
         # mcp-hub 服务默认添加前缀防止重复问题
-        state["char_type"] = "mcp-server-chart-" + json.loads(clean_json_str)["char_type"]
+        state["chart_type"] = "mcp-server-chart-" + json.loads(clean_json_str)["chart_type"]
 
     except Exception as e:
         traceback.print_exception(e)

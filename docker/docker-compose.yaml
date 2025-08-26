@@ -95,4 +95,3 @@ services:
       MINIO_PUBLIC_DOMAIN: "http://localhost:19000"
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    restart: unless-stopped

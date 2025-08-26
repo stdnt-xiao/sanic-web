@@ -33,7 +33,7 @@ docker-build-web-multi: clean build
 
 
 # 构建服务端arm64/amd64架构镜像并推送至阿里云镜像仓库
-docker-build-aliyun-multi:
+docker-build-aliyun-multi: clean build
 	docker buildx build --platform linux/amd64,linux/arm64 --push -t $(ALIYUN_IMAGE_NAME) -f ./docker/Dockerfile .
 
 

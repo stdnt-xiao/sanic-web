@@ -36,7 +36,7 @@ ECharts 📈
 </tr>
 <tr>
 <td><img src="./docs/docs/images/chat-07.png" alt="" style="width:400px;max-height:640px; min-height: 200px"></td>
-<td><img src="./docs/docs/images/chat-08.png" alt="" style="width:400px;max-height:640px; min-height: 200px"></td>
+<td><img src="./docs/docs/images/chat-09.png" alt="" style="width:400px;max-height:640px; min-height: 200px"></td>
 </tr>
 </tbody>
 </table>
@@ -99,7 +99,7 @@ ECharts 📈
 <table>
 <tbody>
 <tr>
-<td><img src="/docs/docs/images/wchat-search.png" alt="" style="width:600px;max-height:640px; min-height: 200px"></td>
+<td><img src="/docs/docs/images/wchat-search.png" alt="" style="width:680px;max-height:640px; min-height: 200px"></td>
 </tr>
 </tbody>
 </table>
@@ -107,7 +107,7 @@ ECharts 📈
 
 
 
-### 常用DSL清单整理
+### 常用DSL清单搜集
 - **以下DSL清单来源声明：https://github.com/wwwzhouhui/dify-for-dsl.git 项目作者：wwwzhouhui**
 
 | DSL清单名称                                                                                                                                                       | 工作流显示                         | 用到技术                                                     | 更新时间                                                 | 作者                                       | 适用dify版本                               |

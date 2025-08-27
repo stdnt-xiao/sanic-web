@@ -95,3 +95,12 @@ services:
       MINIO_PUBLIC_DOMAIN: "http://localhost:19000"
     extra_hosts:
       - "host.docker.internal:host-gateway"
+
+  neo4j:
+    image: neo4j:ubi9
+    container_name: neo4j
+    ports:
+      - "7687:7687"
+      - "7474:7474"
+    volumes:
+      - ./volume/neo4j:/data

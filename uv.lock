@@ -130,6 +130,7 @@ dependencies = [
     { name = "openai" },
     { name = "openpyxl" },
     { name = "pdfplumber" },
+    { name = "py2neo" },
     { name = "pydantic" },
     { name = "pyjwt" },
     { name = "pymupdf" },
@@ -173,6 +174,7 @@ requires-dist = [
     { name = "openai", specifier = ">=1.97.0" },
     { name = "openpyxl", specifier = ">=3.1.5,<4.0.0" },
     { name = "pdfplumber", specifier = ">=0.11.3,<0.12.0" },
+    { name = "py2neo", specifier = ">=2021.2.4" },
     { name = "pydantic", specifier = ">=2.11.7" },
     { name = "pyjwt", specifier = ">=2.9.0,<3.0.0" },
     { name = "pymupdf", specifier = ">=1.25.2,<2.0.0" },
@@ -678,6 +680,19 @@ source = { registry = "https://mirrors.aliyun.com/pypi/simple" }
 sdist = { url = "https://mirrors.aliyun.com/pypi/packages/f2/97/ebf4da567aa6827c909642694d71c9fcf53e5b504f2d96afea02718862f3/iniconfig-2.1.0.tar.gz", hash = "sha256:3abbd2e30b36733fee78f9c7f7308f2d0050e88f0087fd25c2645f63c773e1c7" }
 wheels = [
     { url = "https://mirrors.aliyun.com/pypi/packages/2c/e1/e6716421ea10d38022b952c159d5161ca1193197fb744506875fbb87ea7b/iniconfig-2.1.0-py3-none-any.whl", hash = "sha256:9deba5723312380e77435581c6bf4935c94cbfab9b1ed33ef8d238ea168eb760" },
+]
+
+[[package]]
+name = "interchange"
+version = "2021.0.4"
+source = { registry = "https://mirrors.aliyun.com/pypi/simple" }
+dependencies = [
+    { name = "pytz" },
+    { name = "six" },
+]
+sdist = { url = "https://mirrors.aliyun.com/pypi/packages/ca/10/055c9f411105acd277465a356f4d8c1c2a8d266b87ce68148c47ad54eebf/interchange-2021.0.4.tar.gz", hash = "sha256:6791d1b34621e990035fe75d808523172340d80ade1b50412226820184199550" }
+wheels = [
+    { url = "https://mirrors.aliyun.com/pypi/packages/88/bd/abc58e5a36a28e0e55501f4bc15df74e430f399375b14b83f4ce22a257b4/interchange-2021.0.4-py2.py3-none-any.whl", hash = "sha256:3a791b4df765c7136c318e53c388380ac5b003767808876c4fb4fef393917768" },
 ]
 
 [[package]]
@@ -1207,6 +1222,15 @@ wheels = [
 ]
 
 [[package]]
+name = "monotonic"
+version = "1.6"
+source = { registry = "https://mirrors.aliyun.com/pypi/simple" }
+sdist = { url = "https://mirrors.aliyun.com/pypi/packages/ea/ca/8e91948b782ddfbd194f323e7e7d9ba12e5877addf04fb2bf8fca38e86ac/monotonic-1.6.tar.gz", hash = "sha256:3a55207bcfed53ddd5c5bae174524062935efed17792e9de2ad0205ce9ad63f7" }
+wheels = [
+    { url = "https://mirrors.aliyun.com/pypi/packages/9a/67/7e8406a29b6c45be7af7740456f7f37025f0506ae2e05fb9009a53946860/monotonic-1.6-py2.py3-none-any.whl", hash = "sha256:68687e19a14f11f26d140dd5c86f3dba4bf5df58003000ed467e0e2a69bca96c" },
+]
+
+[[package]]
 name = "more-itertools"
 version = "10.7.0"
 source = { registry = "https://mirrors.aliyun.com/pypi/simple" }
@@ -1389,6 +1413,18 @@ wheels = [
 ]
 
 [[package]]
+name = "pansi"
+version = "2024.11.0"
+source = { registry = "https://mirrors.aliyun.com/pypi/simple" }
+dependencies = [
+    { name = "pillow" },
+]
+sdist = { url = "https://mirrors.aliyun.com/pypi/packages/b2/93/2583b4b709707cc3b3dffc6ae49d6e96031eae46bd71c047b48417bac66d/pansi-2024.11.0.tar.gz", hash = "sha256:018186294f012ae48e207d9446b1bd22b0f2ebb2de60a6c4fb079abfacdf4a37" }
+wheels = [
+    { url = "https://mirrors.aliyun.com/pypi/packages/0b/81/8d19773a1da754e6c9342ca7801d0d75775425ea729e127e4851de63d8da/pansi-2024.11.0-py2.py3-none-any.whl", hash = "sha256:79275348a03e022d4482d0bbd9fe7fae7741eb2de84dbe560631d48a9fa522e5" },
+]
+
+[[package]]
 name = "pathspec"
 version = "0.12.1"
 source = { registry = "https://mirrors.aliyun.com/pypi/simple" }
@@ -1491,6 +1527,25 @@ wheels = [
     { url = "https://mirrors.aliyun.com/pypi/packages/96/0a/7d5260b914e01d1d0906f7f38af101f8d8ed0dc47426219eeaf05e8ea7c2/propcache-0.3.2-cp311-cp311-win32.whl", hash = "sha256:36c8d9b673ec57900c3554264e630d45980fd302458e4ac801802a7fd2ef7897" },
     { url = "https://mirrors.aliyun.com/pypi/packages/e1/2d/89fe4489a884bc0da0c3278c552bd4ffe06a1ace559db5ef02ef24ab446b/propcache-0.3.2-cp311-cp311-win_amd64.whl", hash = "sha256:e53af8cb6a781b02d2ea079b5b853ba9430fcbe18a8e3ce647d5982a3ff69f39" },
     { url = "https://mirrors.aliyun.com/pypi/packages/cc/35/cc0aaecf278bb4575b8555f2b137de5ab821595ddae9da9d3cd1da4072c7/propcache-0.3.2-py3-none-any.whl", hash = "sha256:98f1ec44fb675f5052cccc8e609c46ed23a35a1cfd18545ad4e29002d858a43f" },
+]
+
+[[package]]
+name = "py2neo"
+version = "2021.2.4"
+source = { registry = "https://mirrors.aliyun.com/pypi/simple" }
+dependencies = [
+    { name = "certifi" },
+    { name = "interchange" },
+    { name = "monotonic" },
+    { name = "packaging" },
+    { name = "pansi" },
+    { name = "pygments" },
+    { name = "six" },
+    { name = "urllib3" },
+]
+sdist = { url = "https://mirrors.aliyun.com/pypi/packages/96/bb/fd298b06181fc4aace4838d91e6b511184ad1f3e5fe9cffee7878c66f14a/py2neo-2021.2.4.tar.gz", hash = "sha256:4b2737fcd9fd8d82b57e856de4eda005281c9cf0741c989e5252678f0503f77e" }
+wheels = [
+    { url = "https://mirrors.aliyun.com/pypi/packages/b6/e5/d97c8adbda3b9a6957c572f05a8427661194832d4709b90c108b7e868268/py2neo-2021.2.4-py2.py3-none-any.whl", hash = "sha256:2ddbe818354a6fa16d47dfd0fe5cb0287fa42ff109e87aa7b3e43636060d85a1" },
 ]
 
 [[package]]

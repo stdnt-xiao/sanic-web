@@ -138,7 +138,7 @@ class Text2SqlAgent:
             "schema_inspector": lambda: f"共检索{len(step_value['db_info'])}张表.",
             "llm_reasoning": lambda: step_value["sql_reasoning"],
             "sql_generator": lambda: step_value["generated_sql"],
-            "sql_executor": lambda: "执行sql语句成功",
+            "sql_executor": lambda: "执行sql语句成功" if step_value["execution_result"].success else "执行sql语句失败",
             "summarize": lambda: step_value["report_summary"],
             "data_render": lambda: step_value["chart_url"],
             "data_render_apache": lambda: step_value["apache_chart_data"],

@@ -471,26 +471,26 @@ const handleResetState = () => {
 }
 handleResetState()
 
-// 文件上传
-const file_name = ref('')
-const finish_upload = (res) => {
-  file_name.value = res.file.name
-  if (res.event.target.responseText) {
-    const json_data = JSON.parse(res.event.target.responseText)
-    const file_url = json_data.data.object_key
-    if (json_data.code === 200) {
-      onAqtiveChange('FILEDATA_QA', '')
-      businessStore.update_file_url(file_url)
-      window.$ModalMessage.success(`文件上传成功`)
-    } else {
-      window.$ModalMessage.error(`文件上传失败`)
-      return
-    }
-    const file_name_without_extension = file_name.value.slice(0, file_name.value.lastIndexOf('.')) || file_name.value
-    const query_text = `分析${file_name_without_extension}表格数据`
-    handleCreateStylized(query_text)
-  }
-}
+// // 文件上传
+// const file_name = ref('')
+// const finish_upload = (res) => {
+//   file_name.value = res.file.name
+//   if (res.event.target.responseText) {
+//     const json_data = JSON.parse(res.event.target.responseText)
+//     const file_url = json_data.data.object_key
+//     if (json_data.code === 200) {
+//       onAqtiveChange('FILEDATA_QA', '')
+//       businessStore.update_file_url(file_url)
+//       window.$ModalMessage.success(`文件上传成功`)
+//     } else {
+//       window.$ModalMessage.error(`文件上传失败`)
+//       return
+//     }
+//     const file_name_without_extension = file_name.value.slice(0, file_name.value.lastIndexOf('.')) || file_name.value
+//     const query_text = `分析${file_name_without_extension}表格数据`
+//     handleCreateStylized(query_text)
+//   }
+// }
 
 // 下面方法用于左侧对话列表点击 右侧内容滚动
 // 用于存储每个 MarkdownPreview 容器的引用
@@ -623,89 +623,31 @@ const onSuggested = (index: number) => {
   handleCreateStylized(suggested_array.value[index])
 }
 
-const pendingUploadFileInfoList = ref([])
+const pendingUploadFileInfoList = ref<UploadFileInfo[]>([])
 
-
-// 下拉菜单的选项，重构上传组件
-const options = [
-  {
-    key: 'excel',
-    type: 'render',
-    render() {
-      return (
-        <n-upload
-          accept=".xls,.xlsx"
-          default-upload={false}
-          show-file-list={false}
-          multiple={false}
-          onChange={(res) => {
-            pendingUploadFileInfoList.value.push(res.file)
-          }}
-        >
-          <div class="px-4">
-            <div
-              flex="~ items-center gap-4"
-              class="cursor-pointer px-12 py-4 hover:bg-primary/10 transition-all-300"
-            >
-              <span class="i-material-symbols:file-open-outline text-16" />
-              <span>上传文档</span>
-            </div>
-          </div>
-        </n-upload>
-      )
-    },
-  },
-  {
-    key: 'image',
-    type: 'render',
-    render() {
-      return (
-        <n-upload
-          accept="image/*"
-          default-upload={false}
-          show-file-list={false}
-          multiple
-          onChange={(res) => {
-            pendingUploadFileInfoList.value.push(res.file)
-          }}
-        >
-          <div class="px-4">
-            <div
-              flex="~ items-center gap-4"
-              class="cursor-pointer px-12 py-4 hover:bg-primary/10 transition-all-300"
-            >
-              <span class="i-mdi:file-image-outline text-16" />
-              <span>上传图片</span>
-            </div>
-          </div>
-        </n-upload>
-      )
-    },
-  },
-]
 
 // 下拉菜单选项选择事件处理程序
-const uploadRef = useTemplateRef('uploadRef')
-function handleSelect(key: string) {
-  // if (key === 'excel') {
-  //   // 使用 nextTick 确保 DOM 更新完成后执行
-  //   nextTick(() => {
-  //     if (uploadRef.value) {
-  //       // 尝试直接调用 n-upload 的点击方法
-  //       // 如果 n-upload 没有提供这样的方法，可以查找内部的 input 并调用 click 方法
-  //       const fileInput
-  //                   = uploadRef.value.$el.querySelector('input[type="file"]')
-  //       if (fileInput) {
-  //         fileInput.click()
-  //       }
-  //     }
-  //   })
-  // } else {
-  //   window.$ModalMessage.success('功能开发中', {
-  //     duration: 1500,
-  //   })
-  // }
-}
+// const uploadRef = useTemplateRef('uploadRef')
+// function handleSelect(key: string) {
+//   // if (key === 'excel') {
+//   //   // 使用 nextTick 确保 DOM 更新完成后执行
+//   //   nextTick(() => {
+//   //     if (uploadRef.value) {
+//   //       // 尝试直接调用 n-upload 的点击方法
+//   //       // 如果 n-upload 没有提供这样的方法，可以查找内部的 input 并调用 click 方法
+//   //       const fileInput
+//   //                   = uploadRef.value.$el.querySelector('input[type="file"]')
+//   //       if (fileInput) {
+//   //         fileInput.click()
+//   //       }
+//   //     }
+//   //   })
+//   // } else {
+//   //   window.$ModalMessage.success('功能开发中', {
+//   //     duration: 1500,
+//   //   })
+//   // }
+// }
 
 // 侧边表格滚动条数 动态显示隐藏设置
 const scrollableContainer = useTemplateRef('scrollableContainer')
@@ -815,7 +757,66 @@ onBeforeUnmount(() => {
     messagesContainer.value.removeEventListener('scroll', handleScroll)
   }
 })
+
 // ===============================================//
+// 上传附件 下拉菜单的选项
+const options = [
+  {
+    key: 'document',
+    type: 'render',
+    render() {
+      return (
+        <n-upload
+          accept=".doc,.docx,.ppt,.pptx,.pdf,.txt,.xlsx,.csv"
+          default-upload={true}
+          show-file-list={false}
+          multiple={false}
+          action="sanic/file/upload_file_and_parse"
+          onBeforeUpload={(res) => {
+            pendingUploadFileInfoList.value.push(res.file)
+          }}
+        >
+          <div class="px-4">
+            <div
+              flex="~ items-center gap-4"
+              class="cursor-pointer px-12 py-4 hover:bg-primary/10 transition-all-300"
+            >
+              <span class="i-material-symbols:file-open-outline text-16" />
+              <span>上传文档</span>
+            </div>
+          </div>
+        </n-upload>
+      )
+    },
+  },
+  {
+    key: 'image',
+    type: 'render',
+    render() {
+      return (
+        <n-upload
+          accept="image/*"
+          default-upload={false}
+          show-file-list={false}
+          multiple
+          onChange={(res) => {
+            pendingUploadFileInfoList.value.push(res.file)
+          }}
+        >
+          <div class="px-4">
+            <div
+              flex="~ items-center gap-4"
+              class="cursor-pointer px-12 py-4 hover:bg-primary/10 transition-all-300"
+            >
+              <span class="i-mdi:file-image-outline text-16" />
+              <span>上传图片</span>
+            </div>
+          </div>
+        </n-upload>
+      )
+    },
+  },
+]
 
 const UploadWrapperItem = defineComponent({
   name: 'UploadWrapperItem',
@@ -885,6 +886,7 @@ const UploadWrapperItem = defineComponent({
     const fileTypeIconMap = ref({
       xlsx: 'i-vscode-icons:file-type-excel2',
       xls: 'i-vscode-icons:file-type-excel2',
+      csv: 'i-vscode-icons:file-type-excel2',
       docx: 'i-vscode-icons:file-type-word',
       doc: 'i-vscode-icons:file-type-word',
       pdf: 'i-vscode-icons:file-type-pdf2',
@@ -1466,18 +1468,6 @@ const UploadWrapperItem = defineComponent({
                           <div class="text-20  i-uil:upload cursor-pointer"></div>
                         </div>
                       </n-dropdown>
-                      <!-- 此隐藏按钮已废弃，请在 UploadWrapperItem 组件中编写触发上传接口的逻辑 -->
-                      <!-- <n-upload
-                        ref="uploadRef"
-                        type="button"
-                        :show-file-list="false"
-                        action="sanic/file/upload_file"
-                        accept=".xlsx,.xls,.csv"
-                        style="display: none"
-                        @finish="finish_upload"
-                      >
-                        选择文件
-                      </n-upload> -->
                     </template>
                   </n-input>
 

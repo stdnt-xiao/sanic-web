@@ -4,6 +4,7 @@ import { UAParser } from 'ua-parser-js'
 import * as GlobalAPI from '@/api'
 import { isMockDevelopment } from '@/config'
 import DefaultPage from './DefaultPage.vue'
+import FileListItem from './FileListItem.vue'
 import FileUploadManager from './FileUploadManager.vue'
 import SuggestedView from './SuggestedPage.vue'
 import TableModal from './TableModal.vue'
@@ -162,9 +163,6 @@ const onRecycleQa = async (index: number) => {
   const item = conversationItems.value[index]
   onAqtiveChange(item.qa_type, item.chat_id)
 
-  if (item.qa_type === 'FILEDATA_QA') {
-    businessStore.update_file_url(item.file_key)
-  }
 
   // 清空推荐列表
   suggested_array.value = []
@@ -220,9 +218,13 @@ const conversationItems = ref<
     chat_id: string
     qa_type: string
     question: string
-    file_key: string
     role: 'user' | 'assistant'
     reader: ReadableStreamDefaultReader | null
+    file_key: {
+      source_file_key: string
+      parse_file_key: string
+      file_size: string
+    }[]
   }>
 >([])
 
@@ -239,16 +241,47 @@ const contentLoadingStates = ref(
 // 改为对象存储不同问答类型的uuid
 const uuids = ref<Record<string, string>>({})
 
-// 提交对话
-const handleCreateStylized = async (send_text = '') => {
-  // 判断是否有未上传的文件
-  if (fileUploadRef.value?.pendingUploadFileInfoList && fileUploadRef.value.pendingUploadFileInfoList.length > 0) {
-    console.log(fileUploadRef.value.pendingUploadFileInfoList)
-    // 清空文件上传列表
-    pendingUploadFileInfoList.value = []
+// 校验文件上传状态和业务处理逻辑
+const checkAllFilesUploaded = () => {
+  const pendingFiles = fileUploadRef.value?.pendingUploadFileInfoList || []
+
+  // 新增：数据问答不支持文件上传
+  if (qa_type.value === 'DATABASE_QA' && pendingFiles.length > 0) {
+    window.$ModalMessage.warning('数据问答不支持文件上传，请切换到其他智能问答')
+    return false
   }
 
+  // 新增：表格问答只支持单个excel文件
+  if (qa_type.value === 'FILEDATA_QA') {
+    if (pendingFiles.length > 1) {
+      window.$ModalMessage.warning('表格问答只支持上传单个文件')
+      return false
+    }
 
+    if (pendingFiles.length === 1) {
+      const file = pendingFiles[0]
+      const fileName = file.name?.toLowerCase() || ''
+      const isExcelFile = fileName.endsWith('.xlsx') || fileName.endsWith('.xls') || fileName.endsWith('.csv')
+
+      if (!isExcelFile) {
+        window.$ModalMessage.warning('表格问答只支持Excel文件格式(.xlsx, .xls ,.csv)')
+        return false
+      }
+    }
+  }
+
+  for (const file of pendingFiles) {
+    if (file.status !== 'finished') {
+      window.$ModalMessage.warning('存在未完成上传或解析失败的文件，请检查后重试')
+      return false
+    }
+  }
+  return true
+}
+
+
+// 提交对话
+const handleCreateStylized = async (send_text = '') => {
   // 设置背景颜色
   backgroundColorVariable.value = '#f6f7fb'
 
@@ -283,19 +316,26 @@ const handleCreateStylized = async (send_text = '') => {
     }
   }
 
-  // 如果没有上传文件 表格问答直接提示并返回
-  if (
-    qa_type.value === 'FILEDATA_QA'
-    && `${businessStore.$state.file_url}` === ''
-  ) {
-    window.$ModalMessage.success('请先上传文件')
-    return
+  let upload_file_list
+  // 判断是否有未上传的文件
+  if (fileUploadRef.value?.pendingUploadFileInfoList && fileUploadRef.value.pendingUploadFileInfoList.length > 0) {
+    // console.log(fileUploadRef.value.pendingUploadFileInfoList)
+    // console.log(businessStore.file_list)
+    // 有一个文件解析失败不允许提交
+    if (!checkAllFilesUploaded()) {
+      return
+    }
+    upload_file_list = businessStore.file_list
   }
 
   if (showDefaultPage.value) {
     // 新建对话 时输入新问题 清空历史数据
     conversationItems.value = []
     showDefaultPage.value = false
+
+    // 清空文件上传列表
+    pendingUploadFileInfoList.value = []
+    businessStore.clear_file_list()
   }
 
   // 自定义id
@@ -325,22 +365,27 @@ const handleCreateStylized = async (send_text = '') => {
     uuids.value[qa_type.value] = uuidv4()
   }
 
+  // 存储该轮用户对话消息
   if (textContent) {
-    // 存储该轮用户对话消息
     conversationItems.value.push({
       uuid: uuid_str,
       chat_id: uuids.value[qa_type.value],
       qa_type: qa_type.value,
       question: textContent,
-      file_key: '',
+      file_key: businessStore.$state.file_list,
       role: 'user',
       reader: null,
     })
     // 更新 currentRenderIndex 以包含新添加的项
     currentRenderIndex.value = conversationItems.value.length - 1
     contentLoadingStates.value[currentRenderIndex.value] = true
+
+    // 清空文件上传列表
+    pendingUploadFileInfoList.value = []
+    businessStore.clear_file_list()
   }
 
+  // 调用大模型
   const { error, reader, needLogin }
     = await businessStore.createAssistantWriterStylized(
       uuid_str,
@@ -349,38 +394,52 @@ const handleCreateStylized = async (send_text = '') => {
       {
         text: textContent,
         writer_oid: currentChatId.value,
+        file_list: upload_file_list,
       },
     )
 
   if (needLogin) {
     message.error('登录已失效，请重新登录')
 
+    // 清空文件上传列表
+    pendingUploadFileInfoList.value = []
+    businessStore.clear_file_list()
+
     // 跳转至登录页面
     setTimeout(() => {
       router.push('/login')
-    }, 2000)
+    }, 500)
   }
 
   if (error) {
     stylizingLoading.value = false
     onCompletedReader(conversationItems.value.length - 1)
+
+    // 清空文件上传列表
+    pendingUploadFileInfoList.value = []
+    businessStore.clear_file_list()
     return
   }
 
   if (reader) {
-    outputTextReader.value = reader
     // 存储该轮AI回复的消息
+    outputTextReader.value = reader
     conversationItems.value.push({
       uuid: uuid_str,
       chat_id: uuids.value[qa_type.value],
       qa_type: qa_type.value,
       question: textContent,
-      file_key: `${businessStore.$state.file_url}`,
+      file_key: [],
       role: 'assistant',
       reader,
     })
+
     // 更新 currentRenderIndex 以包含新添加的项
     currentRenderIndex.value = conversationItems.value.length - 1
+
+    // 清空文件上传列表
+    pendingUploadFileInfoList.value = []
+    businessStore.clear_file_list()
   }
 
   // 滚动到底部
@@ -584,9 +643,9 @@ const onAqtiveChange = (val, chat_id) => {
   }
 
   // 清空文件上传历史url
-  if (val === 'FILEDATA_QA') {
-    businessStore.update_file_url('')
-  }
+  // if (val === 'FILEDATA_QA') {
+  //   businessStore.update_file_url('')
+  // }
 }
 
 // 获取建议问题
@@ -964,6 +1023,19 @@ const pendingUploadFileInfoList = ref([])
                     </n-space>
                   </div>
 
+                  <!-- 用户上传的文件列表 -->
+                  <div
+                    v-if="item.file_key && item.file_key.length > 0"
+                    class="upload-wrapper-list flex flex-wrap gap-10 items-center pb-5"
+                    style="margin-left: 10%; margin-right: 10.5%; width: 80%; justify-content: flex-end;"
+                  >
+                    <FileListItem
+                      v-for="(file, fileIndex) in item.file_key"
+                      :key="fileIndex"
+                      :file="file"
+                    />
+                  </div>
+
                   <!-- 加载动画：紧跟在消息下方，但对齐到左边 -->
                   <div
                     v-if="contentLoadingStates[index]"
@@ -1176,7 +1248,7 @@ const pendingUploadFileInfoList = ref([])
                         </svg>
                       </n-icon>
                     </template>
-                    报告问答
+                    深度搜索
                   </n-button>
                 </div>
                 <div

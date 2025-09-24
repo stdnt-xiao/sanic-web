@@ -163,6 +163,9 @@ class MinioUtils:
                 "text/csv",  # .csv
             }
 
+            # 获取文件大小
+            file_size = len(file_data.body)
+
             if mime_type not in allowed_mimes:
                 raise ValueError("不支持的文件格式")
 
@@ -202,12 +205,39 @@ class MinioUtils:
             parse_file_key = self.upload_to_minio_form_stream(
                 io.BytesIO(full_text.encode("utf-8")), bucket_name, object_name + file_suffix
             )
-            return {"source_file_key": source_file_key["object_key"], "parse_file_key": parse_file_key}
-
+            return {
+                "source_file_key": source_file_key["object_key"],
+                "parse_file_key": parse_file_key,
+                "file_size": self._format_file_size(file_size),
+            }
         except Exception as err:
             logger.error(f"Error uploading file and parsing from request: {err}")
             traceback.print_exception(type(err), err, err.__traceback__)
             raise MyException(SysCode.c_9999) from err
+
+    @staticmethod
+    def _format_file_size(size_bytes: int) -> str:
+        """
+        将字节大小转换为人类可读的格式 (如: 12KB, 1MB)
+
+        :param size_bytes: 文件大小（字节）
+        :return: 格式化后的文件大小字符串
+        """
+        if size_bytes == 0:
+            return "0B"
+
+        size_names = ["B", "KB", "MB", "GB", "TB"]
+        i = 0
+        while size_bytes >= 1024.0 and i < len(size_names) - 1:
+            size_bytes /= 1024.0
+            i += 1
+
+        if i == 0:
+            # 对于字节，不使用小数点
+            return f"{int(size_bytes)}{size_names[i]}"
+        else:
+            # 对于KB及以上，保留一位小数
+            return f"{size_bytes:.1f}{size_names[i]}"
 
     @staticmethod
     def _parse_csv(content):

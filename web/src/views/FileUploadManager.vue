@@ -2,7 +2,7 @@
 import type { UploadFileInfo } from 'naive-ui'
 
 // 全局存储
-// const businessStore = useBusinessStore()
+const businessStore = useBusinessStore()
 
 // 在您的项目中添加类型扩展
 interface ExtendedUploadFileInfo extends UploadFileInfo {
@@ -91,8 +91,8 @@ const handleFileUpload = async (fileInfo: ExtendedUploadFileInfo) => {
       if (index !== -1) {
         pendingUploadFileInfoList.value[index].status = 'finished'
         pendingUploadFileInfoList.value[index].percentage = 100
-        // 设置文件URL
-        // businessStore.update_file_url(result.data.object_key)
+        // 设置解析后的文件minio key
+        businessStore.add_file(result.data)
       }
       window.$ModalMessage.success(`文件上传并解析成功`)
     } else {
@@ -100,7 +100,7 @@ const handleFileUpload = async (fileInfo: ExtendedUploadFileInfo) => {
       const index = pendingUploadFileInfoList.value.findIndex((f) => f.id === fileInfo.id)
       if (index !== -1) {
         pendingUploadFileInfoList.value[index].status = 'error'
-        pendingUploadFileInfoList.value[index].error = new Error(result.message || '上传失败')
+        pendingUploadFileInfoList.value[index].error = new Error(result.msg || '上传失败')
       }
       window.$ModalMessage.error(`文件上传失败`)
     }
@@ -225,7 +225,7 @@ const UploadWrapperItem = defineComponent({
   render() {
     return (
       <div
-        class="relative w-25% px-16 py-5 b b-solid b-bgcolor rounded-8 group transition-all-300"
+        class="relative w-200 px-16 py-5 b b-solid b-bgcolor rounded-8 group transition-all-300"
         flex="~ gap-5 items-center"
       >
         <div class="absolute z-1 top--9 right--9 group-hover:opacity-100 opacity-0 transition-all-300">
@@ -301,6 +301,15 @@ defineExpose({
         :key="pendingUploadFileInfo.id"
         :file-info="pendingUploadFileInfo"
         @remove="() => {
+          // 从businessStore中删除对应的文件
+          const fileInfo = pendingUploadFileInfoList[index];
+          if (fileInfo.status === 'finished' && fileInfo.percentage === 100) {
+            // 获取对应文件的source_file_key并从store中删除
+            const fileData = businessStore.file_list.find((f, idx) => idx === index);
+            if (fileData) {
+              businessStore.remove_file(fileData.source_file_key);
+            }
+          }
           pendingUploadFileInfoList.splice(index, 1)
         }"
       />

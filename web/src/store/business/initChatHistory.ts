@@ -84,7 +84,11 @@ export const fetchConversationHistory = async function fetchConversationHistory(
       chat_id: string
       qa_type: string
       question: string
-      file_key: string
+      file_key: {
+        source_file_key: string
+        parse_file_key: string
+        file_size: string
+      }[]
       role: 'user' | 'assistant'
       reader: ReadableStreamDefaultReader | null
     }>
@@ -160,10 +164,6 @@ export const fetchConversationHistory = async function fetchConversationHistory(
                   break
                 case 'question':
                   question_str = record[key]
-                  // streamDataArray.push({
-                  //     dataType: 't11',
-                  //     content: `问题:${record[key]}`
-                  // })
                   break
                 case 'to2_answer':
                   try {
@@ -207,7 +207,7 @@ export const fetchConversationHistory = async function fetchConversationHistory(
                 chat_id: chat_id_str,
                 qa_type: qa_type_str,
                 question: question_str,
-                file_key: '',
+                file_key: [],
                 role: 'user',
                 reader: null,
               })

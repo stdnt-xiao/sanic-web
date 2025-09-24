@@ -5,23 +5,22 @@
 /**
  * Event Stream 调用大模型接口 Ollama3 (Fetch 调用)
  */
-export async function createOllama3Stylized(text, qa_type, uuid, chat_id) {
+export async function createOllama3Stylized(text, qa_type, uuid, chat_id, file_list) {
   const userStore = useUserStore()
   const token = userStore.getUserToken()
-  const businessStore = useBusinessStore()
   const url = new URL(`${location.origin}/sanic/dify/get_answer`)
   const params = {}
   Object.keys(params).forEach((key) => {
     url.searchParams.append(key, params[key])
   })
 
-  // 文件问答传文件url
-  if (text.includes('表格数据')) {
-    text = `${businessStore.$state.file_url}|${text}`
-  } else if (qa_type === 'FILEDATA_QA') {
-    // 表格问答默认带上文件url/key
-    text = `${businessStore.$state.file_url}|${text}`
-  }
+  // // 文件问答传文件url
+  // if (text.includes('表格数据')) {
+  //   text = `${businessStore.$state.file_url}|${text}`
+  // } else if (qa_type === 'FILEDATA_QA') {
+  //   // 表格问答默认带上文件url/key
+  //   text = `${businessStore.$state.file_url}|${text}`
+  // }
 
   const req = new Request(url, {
     mode: 'cors',
@@ -35,6 +34,7 @@ export async function createOllama3Stylized(text, qa_type, uuid, chat_id) {
       qa_type,
       uuid,
       chat_id,
+      file_list,
     }),
   })
   return fetch(req)

@@ -64,6 +64,9 @@ class DiFyRequest:
             # 自定义id
             uuid_str = req_obj.get("uuid")
 
+            # 获取文件列表
+            file_list = req_obj.get("file_list")
+
             #  使用正则表达式移除所有空白字符（包括空格、制表符、换行符等）
             query = req_obj.get("query")
             cleaned_query = re.sub(r"\s+", "", query)
@@ -85,6 +88,8 @@ class DiFyRequest:
             elif qa_type == DiFyAppEnum.DATABASE_QA.value[0]:
                 await sql_agent.run_agent(query, res, chat_id, uuid_str, token)
                 return None
+            elif qa_type == DiFyAppEnum.FILEDATA_QA.value[0]:
+                cleaned_query = file_list[0]["source_file_key"] + "|" + query
 
             # 判断请求类别
             app_key = self._get_authorization_token(qa_type)

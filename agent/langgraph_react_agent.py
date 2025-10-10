@@ -110,7 +110,7 @@ class LangGraphReactAgent:
         """
         trimmed_messages = trim_messages(
             messages=state["messages"],
-            max_tokens=20000,  # 设置更合理的token限制（根据模型上下文窗口调整）
+            max_tokens=50000,  # 设置更合理的token限制（根据模型上下文窗口调整）
             token_counter=lambda messages: sum(len(msg.content or "") for msg in messages),  # 更准确的token计算方式
             strategy="last",  # 保留最新的消息
             allow_partial=False,
@@ -118,6 +118,7 @@ class LangGraphReactAgent:
             include_system=True,  # 包含系统消息
             text_splitter=None,  # 不使用文本分割器
         )
+
         return {"llm_input_messages": trimmed_messages}
 
     async def run_agent(

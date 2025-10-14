@@ -5,9 +5,11 @@ import logging
 import mimetypes
 import os
 import traceback
+import zipfile  # 添加zipfile模块用于解压zip文件
 from datetime import timedelta
 from uuid import uuid4
 
+import requests
 import pandas as pd
 import pymupdf
 import pymupdf4llm
@@ -124,6 +126,113 @@ class MinioUtils:
             traceback.print_exception(err)
             raise MyException(SysCode.c_9999)
 
+    def _call_mineru_ocr_service(self, pdf_bytes: bytes,file_name: str) -> str:
+        """
+        调用私有化部署的 MinerU 服务进行 PDF OCR 解析。
+
+        参数:
+            pdf_bytes (bytes): PDF 文件的二进制数据
+
+        返回:
+            str: OCR 解析后的文本内容
+
+        异常:
+            MyException: 当 MinerU 服务调用失败时抛出
+        """
+        try:
+            # 🔧 配置 MinerU 服务地址（私有化部署）
+            MINERU_API_URL = "http://localhost:8000/file_parse"# 示例地址
+            files = {
+                "files": (file_name, pdf_bytes, "application/pdf")
+            }
+            payload = {
+                "return_middle_json": "true",
+                "return_model_output": "true",
+                "return_md": "true",
+                "return_images": "true",
+                "end_page_id": "99999",
+                "parse_method": "auto",
+                "start_page_id": "0",
+                "lang_list": "ch",
+                "output_dir": "./output",
+                "server_url": "string",
+                "return_content_list": "false",
+                "backend": "pipeline",
+                "table_enable": "true",
+                "response_format_zip": "true",
+                "formula_enable": "true"
+            }
+            headers = {"accept": "application/json"}
+
+            response = requests.post(MINERU_API_URL, data=payload, files=files, headers=headers)
+
+            if response.status_code != 200:
+                raise MyException(SysCode.c_9999, f"MinerU服务返回错误: {response.status_code}")
+
+            # 检查响应内容类型
+            content_type = response.headers.get('content-type', '')
+            
+            # 处理zip格式响应
+            if 'application/zip' in content_type:
+                logger.info("接收到zip格式响应，开始解压并上传文件")
+                
+                # 确保bucket存在
+                bucket_name = "filedata"
+                self.ensure_bucket(bucket_name)
+                
+                # 上传原始zip文件
+                zip_object_name = file_name.replace(".pdf",".zip")
+                zip_stream = io.BytesIO(response.content)
+                self.client.put_object(bucket_name, zip_object_name, zip_stream, len(response.content), content_type="application/zip")
+                logger.info(f"原始zip响应已上传: {zip_object_name}")
+                
+                # 解压并上传内部文件
+                uploaded_files = []
+                zip_stream.seek(0)  # 重置文件指针
+                
+                with zipfile.ZipFile(zip_stream, 'r') as zip_ref:
+                    for file_name in zip_ref.namelist():
+                        try:
+                            # 读取zip中的文件内容
+                            with zip_ref.open(file_name) as file_in_zip:
+                                file_content = file_in_zip.read()
+                                file_stream = io.BytesIO(file_content)
+                                
+                                # 上传到MinIO
+                                uploaded_key = self.upload_to_minio_form_stream(
+                                    file_stream, 
+                                    bucket_name, 
+                                    file_name
+                                )
+                                
+                                if uploaded_key:
+                                    uploaded_files.append(uploaded_key)
+                                    logger.info(f"zip内文件已上传: {file_name}")
+                        except Exception as e:
+                            logger.error(f"上传zip内文件 {file_name} 时出错: {e}")
+                            # 继续处理其他文件，不中断整体流程
+                            continue
+                
+                # 构建返回结果
+                result_info = {
+                    "zip_file_key": zip_object_name,
+                    "extracted_files": uploaded_files,
+                    "total_files": len(uploaded_files)
+                }
+                return json.dumps(result_info, ensure_ascii=False)
+            else:
+                # 处理JSON格式响应
+                result = response.json()
+                # 假设 MinerU 返回结构为: {"text": "..."}
+                return result.get("text", "") or result.get("content", "")
+
+        except requests.exceptions.RequestException as e:
+            logger.error(f"调用MinerU服务失败: {e}")
+            raise MyException(SysCode.c_9999, "OCR服务不可用，请检查网络或服务状态") from e
+        except Exception as e:
+            logger.error(f"解析MinerU返回结果失败: {e}")
+            raise MyException(SysCode.c_9999, "OCR解析结果异常") from e
+
     def upload_file_and_parse_from_request(self, request: Request, bucket_name: str = "filedata") -> dict:
         """
         上传文件并解析文件内容，返回文件内容key。
@@ -197,17 +306,32 @@ class MinioUtils:
             elif mime_type == "application/pdf":
                 # todo 如果pdf文件中包含图片，则需要使用OCR处理图片 私有化部署minerU支持
                 content.seek(0)
-                full_text = self.read_pdf_text_from_bytes(content.getvalue())
+                # full_text = self.read_pdf_text_from_bytes(content.getvalue())
+                file_bytes = content.getvalue()
+
+                # 先尝试用 pymupdf 提取文本
+                try:
+                    doc = pymupdf.open(stream=file_bytes)
+                    # 判断是否为扫描件（无文本内容但有图像）
+                    has_text = any(len(page.get_text("text").strip()) > 0 for page in doc)
+                    has_images = any(page.get_images(full=True) for page in doc)
+
+                    if has_text and has_images:
+                        # 场景：纯图片/扫描件 PDF → 调用 MinerU OCR 服务
+                        logger.info("检测到扫描件PDF，调用私有化MinerU服务进行OCR...")
+                        full_text = self._call_mineru_ocr_service(file_bytes,file_name=object_name)
+                    else:
+                        # 场景：普通可读PDF → 使用 pymupdf 提取 Markdown
+                        full_text = pymupdf4llm.to_markdown(doc=doc, ignore_images=True)
+                except Exception as e:
+                    logger.warning(f"pymupdf解析失败，尝试调用MinerU: {e}")
+                    full_text = self._call_mineru_ocr_service(file_bytes)
             else:
                 raise ValueError("不支持的文件格式")
 
-            # 创建一个txt文件并上传
-            parse_file_key = self.upload_to_minio_form_stream(
-                io.BytesIO(full_text.encode("utf-8")), bucket_name, object_name + file_suffix
-            )
+            
             return {
                 "source_file_key": source_file_key["object_key"],
-                "parse_file_key": parse_file_key,
                 "file_size": self._format_file_size(file_size),
             }
         except Exception as err:
@@ -363,7 +487,8 @@ class MinioUtils:
 
         for file_info in file_info_list:
             source_file_key = file_info.get("source_file_key")
-            parse_file_key = file_info.get("parse_file_key")
+            file_name = file_info.get("source_file_key").replace(".pdf","")
+            parse_file_key = f"{file_name}/{file_name}_middle.json"
 
             if not parse_file_key:
                 continue
@@ -389,3 +514,68 @@ class MinioUtils:
 
         # 使用分隔线连接各部分
         return "\n----------\n".join(result_parts) if result_parts else ""
+
+    def upload_zip_and_extract_files(self, request: Request, bucket_name: str = "filedata") -> dict:
+        """
+        从请求中读取zip文件，解压并将内部文件上传到MinIO服务器
+
+        参数:
+        - request: Sanic请求对象
+        - bucket_name: 存储桶名称
+        返回:
+        - 包含上传成功的文件列表的字典
+        """
+        try:
+            file_data = request.files.get("file")
+            if not file_data:
+                raise MyException(SysCode.c_9999, "未找到文件数据")
+
+            # 检查是否为zip文件
+            if not file_data.name.endswith('.zip') and file_data.type != 'application/zip':
+                raise MyException(SysCode.c_9999, "文件不是有效的zip文件")
+
+            # 确保bucket存在
+            self.ensure_bucket(bucket_name)
+            
+            # 上传原始zip文件
+            zip_object_name = file_data.name
+            zip_stream = io.BytesIO(file_data.body)
+            self.client.put_object(bucket_name, zip_object_name, zip_stream, len(file_data.body), content_type=file_data.type)
+            logger.info(f"原始zip文件已上传: {zip_object_name}")
+            
+            # 解压并上传内部文件
+            uploaded_files = []
+            zip_stream.seek(0)  # 重置文件指针
+            
+            with zipfile.ZipFile(zip_stream, 'r') as zip_ref:
+                for file_name in zip_ref.namelist():
+                    try:
+                        # 读取zip中的文件内容
+                        with zip_ref.open(file_name) as file_in_zip:
+                            file_content = file_in_zip.read()
+                            file_stream = io.BytesIO(file_content)
+                            
+                            # 上传到MinIO
+                            uploaded_key = self.upload_to_minio_form_stream(
+                                file_stream, 
+                                bucket_name, 
+                                file_name
+                            )
+                            
+                            if uploaded_key:
+                                uploaded_files.append(uploaded_key)
+                                logger.info(f"zip内文件已上传: {file_name}")
+                    except Exception as e:
+                        logger.error(f"上传zip内文件 {file_name} 时出错: {e}")
+                        # 继续处理其他文件，不中断整体流程
+                        continue
+            
+            return {
+                "zip_file_key": zip_object_name,
+                "extracted_files": uploaded_files,
+                "total_files": len(uploaded_files)
+            }
+        except Exception as err:
+            logger.error(f"处理zip文件时出错: {err}")
+            traceback.print_exception(err)
+            raise MyException(SysCode.c_9999)

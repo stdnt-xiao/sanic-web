@@ -141,7 +141,7 @@ class LangGraphReactAgent:
         """
         file_as_markdown = ""
         if file_list:
-            file_as_markdown = minio_utils.get_files_content_as_markdown(file_list)
+            file_as_markdown = minio_utils.get_files_content_as_markdown(file_list)[1:12902]
 
         # 获取用户信息 标识对话状态
         user_dict = await decode_jwt_token(user_token)

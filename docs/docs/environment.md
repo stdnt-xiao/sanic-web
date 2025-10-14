@@ -187,3 +187,35 @@ docker compose up -d neo4j-apoc
 - 登录http://localhost:7474/browser/ neo4j/neo4j123
 
 ![image](images/eno4j-db.png)
+
+### 🌿 mineru
+#### 启动 vllm-server 服务
+并通过`vlm-http-client`后端连接`vllm-server`
+  ```bash
+  docker compose -f compose.yaml --profile vllm-server up -d
+  ```
+  >[!TIP]
+  >在另一个终端中通过http client连接vllm server（只需cpu与网络，不需要vllm环境）
+  > ```bash
+  > mineru -p <input_path> -o <output_path> -b vlm-http-client -u http://<server_ip>:30000
+  > ```
+
+---
+
+#### 启动 Web API 服务
+  ```bash
+  docker compose -f compose.yaml --profile api up -d
+  ```
+  >[!TIP]
+  >在浏览器中访问 `http://<server_ip>:8000/docs` 查看API文档。
+
+---
+
+#### 启动 Gradio WebUI 服务
+  ```bash
+  docker compose -f compose.yaml --profile gradio up -d
+  ```
+  >[!TIP]
+  > 
+  >- 在浏览器中访问 `http://<server_ip>:7860` 使用 Gradio WebUI。
+  >- 访问 `http://<server_ip>:7860/?view=api` 使用 Gradio API。

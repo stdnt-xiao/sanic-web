@@ -93,19 +93,12 @@ services:
       - "3100:3000"
     environment:
       MINIO_USE_SSL: "false"
-<<<<<<< HEAD
       MINIO_PORT: ${MINIO_PORT:-}
       MINIO_ENDPOINT: ${MINIO_ENDPOINT:-}
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-}
       MINIO_SECRET_KEY: ${MiNIO_SECRET_KEY:-}
       MINIO_BUCKET: ${MINIO_BUCKET:-}
       MINIO_PUBLIC_DOMAIN: ${MINIO_PUBLIC_DOMAIN:-}
-=======
-      MINIO_ACCESS_KEY: v2Kn9q5zeXX8orpITc2p
-      MINIO_SECRET_KEY: MwZlHLJKnrb83gnfgSQBpPCoTsOZT2SwURG2tx02
-      MINIO_BUCKET: chart-images
-      MINIO_PUBLIC_DOMAIN: "http://localhost:19000"
->>>>>>> stdnt-xiao/dev
     extra_hosts:
       - "host.docker.internal:host-gateway"
 

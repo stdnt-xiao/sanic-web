@@ -13,6 +13,7 @@ docker/dify/docker/volumes/*
 !docker/dify/docker/volumes/sandbox/conf/config.yaml.example
 !docker/dify/docker/volumes/sandbox/dependencies/python-requirements.txt
 
+build/
 
 .github/*
 
@@ -28,3 +29,11 @@ logs/
 .pytest_cache/
 vector_index/metadata.json
 vector_index/schema.index
+app.egg-info/dependency_links.txt
+app.egg-info/PKG-INFO
+app.egg-info/requires.txt
+app.egg-info/SOURCES.txt
+app.egg-info/top_level.txt
+web/auto-imports.d.ts
+web/components.d.ts
+web/.eslintrc-auto-import.json
